@@ -1,0 +1,122 @@
+/* ===================================================================
+   DEFAULT SETTINGS
+   =================================================================== */
+QWidget {
+    background-color: #00002D;
+    color: #FFFFFF;
+    font-family: 'Orbitron', 'Segoe UI', sans-serif;
+    font-size: 13px;
+}
+
+QLabel {
+    background-color: transparent;
+    color: #00FFFA;
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+QPushButton {
+    background-color: #0D0D52;
+    color: #00FFFA;
+    border: 2px solid #00FFFA;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 5px;
+}
+
+QPushButton:hover {
+    background-color: #00FFFA;
+    color: #00002D;
+}
+
+QPushButton:pressed {
+    background-color: #009693;
+    border: #00FFFA;
+    color: #00002D;
+}
+
+QSlider::groove:horizontal {
+    border: 1px solid #00FFFA;
+    height: 12px;
+    background: #050520;
+    border-radius: 6px;
+}
+
+QSlider::sub-page:horizontal {
+    background: #00FFFA;
+    border-radius: 6px;
+}
+
+QSlider::handle:horizontal {
+    background: #00FFFA;
+    border: 1px solid #FFFFFF;
+    width: 20px;
+    margin-top: -5px;
+    margin-bottom: -5px;
+    border-radius: 10px;
+}
+
+QSlider::handle:horizontal:hover {
+    background: #FFFFFF;
+    border: 2px solid #00FFFA;
+}
+
+/* ===================================================================
+   SPECIFIC SETTINGS
+   =================================================================== */
+
+QLabel#display {
+    border-top: none;
+    border-left: none;
+
+    border-right: 4px solid #00FFFA;
+    border-bottom: 4px solid #00FFFA;
+
+}
+
+QLabel#name {
+    font-size: 180px;
+    font-weight: 900;
+    color: #00FFFA;
+}
+
+QLabel#add_image_info {
+    font-size: 30px;
+}
+
+QPushButton#upload {
+    font-size: 40px;
+    font-weight: 900;
+}
+
+QLabel[WidgetType="slider_label"] {
+    font-size: 18px;
+}
+
+QPushButton#example_img1,
+QPushButton#example_img2,
+QPushButton#example_img3 {
+    border: 4px solid #00FFFA;
+    border-left: none;
+    border-right: none;
+    border-top: 4px solid #00FFFA;
+    border-bottom: 4px solid #00FFFA;
+    border-radius: 0px;
+    background-color: #050520;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+QPushButton#example_img1          { background-image: url("assets/example images/thumbnails/img1.png"); }
+QPushButton#example_img1:hover    { background-image: url("assets/example images/thumbnails/img1hover.png"); }
+QPushButton#example_img1:pressed  { background-image: url("assets/example images/thumbnails/img1click.png"); }
+
+QPushButton#example_img2          { background-image: url("assets/example images/thumbnails/img2.png"); }
+QPushButton#example_img2:hover    { background-image: url("assets/example images/thumbnails/img2hover.png"); }
+QPushButton#example_img2:pressed  { background-image: url("assets/example images/thumbnails/img2click.png"); }
+
+QPushButton#example_img3          { background-image: url("assets/example images/thumbnails/img3.png"); }
+QPushButton#example_img3:hover    { background-image: url("assets/example images/thumbnails/img3hover.png"); }
+QPushButton#example_img3:pressed  { background-image: url("assets/example images/thumbnails/img3click.png"); }
