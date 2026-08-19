@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QFileDialog, QSlider
 from PySide6.QtGui import QPixmap
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QEvent
+from src.sound_manager import play, load_sounds
 
 
 class MainWindow(QWidget):
@@ -21,6 +22,8 @@ class MainWindow(QWidget):
             widget.clicked.connect(action)
         if widget_class == QSlider:
             widget.setOrientation(Qt.Orientation.Horizontal)
+        if wgt_type in ("btn", "slider", "example_img_btn"):
+            widget.installEventFilter(self)
         return widget
 
     def __init__(self):
@@ -31,6 +34,7 @@ class MainWindow(QWidget):
         self.resize(screen_w + ui_width, screen_h + ui_height)
         with open("assets/styles/style.qss", "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
+        load_sounds()
 
         # STATIC WIDGETS
         self.image_display = self.make_widget(
@@ -49,19 +53,22 @@ class MainWindow(QWidget):
         self.example_img_btn1 = self.make_widget(
             widget_class=QPushButton,
             geometry=(screen_w, 44, 320, 168),
-            name="example_img1"
+            name="example_img1",
+            wgt_type="example_img_btn"
         )
 
         self.example_img_btn2 = self.make_widget(
             widget_class=QPushButton,
             geometry=(screen_w, 208, 320, 168),
-            name="example_img2"
+            name="example_img2",
+            wgt_type="example_img_btn"
         )
 
         self.example_img_btn3 = self.make_widget(
             widget_class=QPushButton,
             geometry=(screen_w, 372, 320, 168),
-            name="example_img3"
+            name="example_img3",
+            wgt_type="example_img_btn"
         )
 
         # MENU WIDGETS
@@ -71,7 +78,8 @@ class MainWindow(QWidget):
             geometry=(255, 195, 450, 150),
             name="upload",
             group="menu_widgets",
-            action=self.open_file_dialog
+            action=self.open_file_dialog,
+            wgt_type="btn"
         )
 
         self.name_lbl = self.make_widget(
@@ -90,7 +98,7 @@ class MainWindow(QWidget):
             name="add_image_info"
         )
 
-        #self.hide_ui(ui_group="menu_widgets")
+        # self.hide_ui(ui_group="menu_widgets")
 
         # MAIN WIDGETS
         self.sliders_lbl = self.make_widget(
@@ -117,19 +125,22 @@ class MainWindow(QWidget):
         self.slider1 = self.make_widget(
             widget_class=QSlider,
             geometry=(5, screen_h + 45, 190, 30),
-            group="main_widgets"
+            group="main_widgets",
+            wgt_type="slider"
         )
 
         self.slider2 = self.make_widget(
             widget_class=QSlider,
             geometry=(5, screen_h + 85, 190, 30),
-            group="main_widgets"
+            group="main_widgets",
+            wgt_type="slider"
         )
 
         self.slider3 = self.make_widget(
             widget_class=QSlider,
             geometry=(5, screen_h + 125, 190, 30),
-            group="main_widgets"
+            group="main_widgets",
+            wgt_type="slider"
         )
 
         self.slider1_lbl = self.make_widget(
@@ -161,7 +172,8 @@ class MainWindow(QWidget):
             text="FLIPPER",
             geometry=(420, screen_h + 50, 150, 50),
             group="main_widgets",
-            action=self.process_effect
+            action=self.process_effect,
+            wgt_type="btn"
         )
 
         self.fader_btn = self.make_widget(
@@ -169,7 +181,8 @@ class MainWindow(QWidget):
             text="FADER",
             geometry=(580, screen_h + 50, 150, 50),
             group="main_widgets",
-            action=self.process_effect
+            action=self.process_effect,
+            wgt_type="btn"
         )
 
         self.nuker_btn = self.make_widget(
@@ -177,7 +190,8 @@ class MainWindow(QWidget):
             text="NUKER",
             geometry=(740, screen_h + 50, 150, 50),
             group="main_widgets",
-            action=self.process_effect
+            action=self.process_effect,
+            wgt_type="btn"
         )
 
         self.puzzler_btn = self.make_widget(
@@ -185,7 +199,8 @@ class MainWindow(QWidget):
             text="PUZZLER",
             geometry=(420, screen_h + 110, 150, 50),
             group="main_widgets",
-            action=self.process_effect
+            action=self.process_effect,
+            wgt_type="btn"
         )
 
         self.liner_btn = self.make_widget(
@@ -193,7 +208,8 @@ class MainWindow(QWidget):
             text="LINER",
             geometry=(580, screen_h + 110, 150, 50),
             group="main_widgets",
-            action=self.process_effect
+            action=self.process_effect,
+            wgt_type="btn"
         )
 
         self.rainbower_btn = self.make_widget(
@@ -201,7 +217,8 @@ class MainWindow(QWidget):
             text="RAINBOWER",
             geometry=(740, screen_h + 110, 150, 50),
             group="main_widgets",
-            action=self.process_effect
+            action=self.process_effect,
+            wgt_type="btn"
         )
         # SETTINGS WIDGETS
         self.save_btn = self.make_widget(
@@ -209,7 +226,8 @@ class MainWindow(QWidget):
             text="SAVE",
             geometry=(965, screen_h + 50, 150, 50),
             group="main_widgets",
-            action=self.process_effect
+            action=self.process_effect,
+            wgt_type="btn"
         )
 
         self.new_img_btn = self.make_widget(
@@ -217,7 +235,8 @@ class MainWindow(QWidget):
             text="NEW IMAGE",
             geometry=(1125, screen_h + 50, 150, 50),
             group="main_widgets",
-            action=self.process_effect
+            action=self.process_effect,
+            wgt_type="btn"
         )
 
         self.reset_btn = self.make_widget(
@@ -225,7 +244,8 @@ class MainWindow(QWidget):
             text="RESET IMAGE",
             geometry=(965, screen_h + 110, 150, 50),
             group="main_widgets",
-            action=self.process_effect
+            action=self.process_effect,
+            wgt_type="btn"
         )
 
         self.mute_btn = self.make_widget(
@@ -233,16 +253,28 @@ class MainWindow(QWidget):
             text="MUTE SOUNDS",
             geometry=(1125, screen_h + 110, 150, 50),
             group="main_widgets",
-            action=self.process_effect
+            action=self.process_effect,
+            wgt_type="btn"
         )
 
-        #self.hide_ui("main_widgets")
+        # self.hide_ui("main_widgets")
         self.hide_ui("menu_widgets")
 
     def hide_ui(self, ui_group: str):
         for widget in self.findChildren(QWidget):
             if widget.property("UIGroup") == ui_group:
                 widget.hide()
+
+    def eventFilter(self, watched, event, /):
+        wgt_type = watched.property("WidgetType")
+        if event.type() == QEvent.Type.Enter:
+            if wgt_type in ("btn", "slider", "example_img_btn"):
+                play(wgt_type, "hover")
+        elif event.type() == QEvent.Type.MouseButtonPress:
+            if event.button() == Qt.MouseButton.LeftButton:
+                if wgt_type in ("btn", "example_img_btn"):
+                    play(wgt_type, "click")
+        return super().eventFilter(watched, event)
 
     def process_effect(self):
         pass
@@ -256,7 +288,6 @@ class MainWindow(QWidget):
         )
         if file_path:
             print(f"Wybrano plik: {file_path}")
-            # Wczytanie i wyświetlenie obrazu na QLabel (image_display)
             pixmap = QPixmap(file_path)
             self.image_display.setPixmap(pixmap.scaled(self.image_display.size()))
 
