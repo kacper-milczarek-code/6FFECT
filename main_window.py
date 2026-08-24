@@ -1,29 +1,53 @@
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QFileDialog, QSlider
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QMouseEvent
 from PySide6.QtCore import Qt, QEvent
 from src.sound_manager import play, load_sounds
+from src.config import DEFAULT_VALUES, SLIDERS_SETTINGS, current_sliders
 
 
 class MainWindow(QWidget):
 
-    def make_widget(self, widget_class, text=None, geometry=None, name=None, group=None, wgt_type=None, action=None):
+    def make_widget(self, widget_class, **kwargs):
+        """
+        Universal function for creating and configuring Qt widgets
+        Kwargs:
+            text (str): Display text for the widget.
+            geometry (tuple[int, int, int, int]): Widget coordinates and size (x, y, width, height).
+            name (str): Set object name via setObjectName().
+            group (str): 'UIGroup' property used for show/hide operations.
+            wgt_type (str): Widget category ('btn', 'slider', 'example_img_btn') to install the event filter.
+            action (callable): Callback function connected to the .clicked signal.
+            value (int): Initial value for QSlider widgets.
+            sld_lbl (QLabel): Label object to display the slider's current name and value.
+            sld_num (int): Index key used to fetch slider names from current_sliders.
+        """
         widget = widget_class(self)
-        if text:
-            widget.setText(text)
-        if geometry:
-            widget.setGeometry(*geometry)
-        if name:
-            widget.setObjectName(name)
-        if group:
-            widget.setProperty("UIGroup", group)
-        if wgt_type:
+
+        if "text" in kwargs: widget.setText(kwargs["text"])
+        if "geometry" in kwargs: widget.setGeometry(*kwargs["geometry"])
+        if "name" in kwargs: widget.setObjectName(kwargs["name"])
+        if "group" in kwargs: widget.setProperty("UIGroup", kwargs["group"])
+
+        if "wgt_type" in kwargs:
+            wgt_type = kwargs["wgt_type"]
             widget.setProperty("WidgetType", wgt_type)
-        if action:
-            widget.clicked.connect(action)
+            if wgt_type in ("btn", "slider", "example_img_btn"):
+                widget.installEventFilter(self)
+
+        if "action" in kwargs and hasattr(widget, "clicked"):
+            widget.clicked.connect(kwargs["action"])
+
         if widget_class == QSlider:
             widget.setOrientation(Qt.Orientation.Horizontal)
-        if wgt_type in ("btn", "slider", "example_img_btn"):
-            widget.installEventFilter(self)
+            widget.setRange(1, 100)
+
+            if "value" in kwargs:
+                widget.setValue(kwargs["value"])
+
+            if "sld_lbl" in kwargs and "sld_num" in kwargs:
+                lbl, idx = kwargs["sld_lbl"], kwargs["sld_num"]
+                widget.valueChanged.connect(lambda val, lb=lbl, i=idx: lb.setText(f"{current_sliders[i]}: {val}"))
+
         return widget
 
     def __init__(self):
@@ -98,7 +122,6 @@ class MainWindow(QWidget):
             name="add_image_info"
         )
 
-        # self.hide_ui(ui_group="menu_widgets")
 
         # MAIN WIDGETS
         self.sliders_lbl = self.make_widget(
@@ -122,30 +145,9 @@ class MainWindow(QWidget):
             group="main_widgets"
         )
 
-        self.slider1 = self.make_widget(
-            widget_class=QSlider,
-            geometry=(5, screen_h + 45, 190, 30),
-            group="main_widgets",
-            wgt_type="slider"
-        )
-
-        self.slider2 = self.make_widget(
-            widget_class=QSlider,
-            geometry=(5, screen_h + 85, 190, 30),
-            group="main_widgets",
-            wgt_type="slider"
-        )
-
-        self.slider3 = self.make_widget(
-            widget_class=QSlider,
-            geometry=(5, screen_h + 125, 190, 30),
-            group="main_widgets",
-            wgt_type="slider"
-        )
-
         self.slider1_lbl = self.make_widget(
             widget_class=QLabel,
-            text="Brightness: 50",
+            text=f"Brightness: {DEFAULT_VALUES["NO MODE"]["BRIGHTNESS"]}",
             geometry=(205, screen_h + 44, 300, 30),
             group="main_widgets",
             wgt_type="slider_label"
@@ -153,7 +155,7 @@ class MainWindow(QWidget):
 
         self.slider2_lbl = self.make_widget(
             widget_class=QLabel,
-            text="Saturation: 50",
+            text=f"Saturation: {DEFAULT_VALUES["NO MODE"]["SATURATION"]}",
             geometry=(205, screen_h + 84, 300, 30),
             group="main_widgets",
             wgt_type="slider_label"
@@ -161,10 +163,40 @@ class MainWindow(QWidget):
 
         self.slider3_lbl = self.make_widget(
             widget_class=QLabel,
-            text="Contrast: 50",
+            text=f"Contrast: {DEFAULT_VALUES["NO MODE"]["CONTRAST"]}",
             geometry=(205, screen_h + 124, 300, 30),
             group="main_widgets",
             wgt_type="slider_label"
+        )
+
+        self.slider1 = self.make_widget(
+            widget_class=QSlider,
+            geometry=(5, screen_h + 45, 190, 30),
+            group="main_widgets",
+            wgt_type="slider",
+            sld_lbl=self.slider1_lbl,
+            sld_num=0,
+            value=DEFAULT_VALUES["NO MODE"]["BRIGHTNESS"]
+        )
+
+        self.slider2 = self.make_widget(
+            widget_class=QSlider,
+            geometry=(5, screen_h + 85, 190, 30),
+            group="main_widgets",
+            wgt_type="slider",
+            sld_lbl=self.slider2_lbl,
+            sld_num=1,
+            value=DEFAULT_VALUES["NO MODE"]["SATURATION"]
+        )
+
+        self.slider3 = self.make_widget(
+            widget_class=QSlider,
+            geometry=(5, screen_h + 125, 190, 30),
+            group="main_widgets",
+            wgt_type="slider",
+            sld_lbl=self.slider3_lbl,
+            sld_num=2,
+            value=DEFAULT_VALUES["NO MODE"]["CONTRAST"]
         )
 
         self.flipper_btn = self.make_widget(
@@ -241,7 +273,7 @@ class MainWindow(QWidget):
 
         self.reset_btn = self.make_widget(
             widget_class=QPushButton,
-            text="RESET IMAGE",
+            text="RESET",
             geometry=(965, screen_h + 110, 150, 50),
             group="main_widgets",
             action=self.process_effect,
@@ -265,13 +297,16 @@ class MainWindow(QWidget):
             if widget.property("UIGroup") == ui_group:
                 widget.hide()
 
-    def eventFilter(self, watched, event, /):
+    def eventFilter(self, watched: QWidget, event, /):
+        """
+        Triggers sound effects on widget hover and click release events.
+        """
         wgt_type = watched.property("WidgetType")
         if event.type() == QEvent.Type.Enter:
             if wgt_type in ("btn", "slider", "example_img_btn"):
                 play(wgt_type, "hover")
-        elif event.type() == QEvent.Type.MouseButtonPress:
-            if event.button() == Qt.MouseButton.LeftButton:
+        elif isinstance(event, QMouseEvent) and event.type() == QEvent.Type.MouseButtonRelease:
+            if event.button() == Qt.MouseButton.LeftButton and watched.rect().contains(event.position().toPoint()):
                 if wgt_type in ("btn", "example_img_btn"):
                     play(wgt_type, "click")
         return super().eventFilter(watched, event)
@@ -294,8 +329,8 @@ class MainWindow(QWidget):
 
 def app_init():
     app = QApplication()
-    okno = MainWindow()
-    okno.show()
+    window = MainWindow()
+    window.show()
     app.exec()
 
 
