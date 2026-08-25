@@ -22,19 +22,26 @@ QPushButton {
     border: 2px solid #00FFFA;
     border-radius: 10px;
     font-weight: bold;
-    font-size: 12px;
+    font-size: 15px;
     padding: 5px;
 }
 
 QPushButton:hover {
-    background-color: #00FFFA;
-    color: #00002D;
+    background-color: #123BA8;
+
 }
 
 QPushButton:pressed {
-    background-color: #009693;
-    border: #00FFFA;
-    color: #00002D;
+    background-color: #030B1F;
+}
+
+QPushButton:checked {
+    border: 5px solid #00FFFA;
+    border-radius: 10px;
+}
+
+QPushButton:checked:hover {
+    background-color: #123BA8;
 }
 
 QSlider::groove:horizontal {

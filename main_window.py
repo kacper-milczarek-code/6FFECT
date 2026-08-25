@@ -1,8 +1,8 @@
-from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QFileDialog, QSlider
+from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QFileDialog, QSlider, QButtonGroup
 from PySide6.QtGui import QPixmap, QMouseEvent
 from PySide6.QtCore import Qt, QEvent
 from src.sound_manager import play, load_sounds
-from src.config import DEFAULT_VALUES, SLIDERS_SETTINGS, current_sliders
+import src.config as cfg
 
 
 class MainWindow(QWidget):
@@ -11,15 +11,17 @@ class MainWindow(QWidget):
         """
         Universal function for creating and configuring Qt widgets
         Kwargs:
-            text (str): Display text for the widget.
+            text (str): Set widget text via setText
             geometry (tuple[int, int, int, int]): Widget coordinates and size (x, y, width, height).
             name (str): Set object name via setObjectName().
             group (str): 'UIGroup' property used for show/hide operations.
             wgt_type (str): Widget category ('btn', 'slider', 'example_img_btn') to install the event filter.
-            action (callable): Callback function connected to the .clicked signal.
+            action (callable): Callback function connected to the clicked signal.
             value (int): Initial value for QSlider widgets.
             sld_lbl (QLabel): Label object to display the slider's current name and value.
             sld_num (int): Index key used to fetch slider names from current_sliders.
+            effect (str): Name of the effect associated with the button, passed to the action callback.
+            img_path (str): File path to the image passed to the action callback, displayed by image_display.
         """
         widget = widget_class(self)
 
@@ -34,9 +36,18 @@ class MainWindow(QWidget):
             if wgt_type in ("btn", "slider", "example_img_btn"):
                 widget.installEventFilter(self)
 
-        if "action" in kwargs and hasattr(widget, "clicked"):
-            widget.clicked.connect(kwargs["action"])
-
+        if "action" in kwargs and hasattr(widget, "clicked") and isinstance(widget, QPushButton):
+            action = kwargs["action"]
+            if "effect" in kwargs:
+                effect = kwargs["effect"]
+                widget.clicked.connect(lambda checked, w=widget: (self.highlight_button(w), action(effect, checked)))
+                widget.setCheckable(True)
+                self.effects_buttons.addButton(widget)
+            elif "img_path" in kwargs:
+                img_path = kwargs["img_path"]
+                widget.clicked.connect(lambda checked, p=img_path: action(p))
+            else:
+                widget.clicked.connect(kwargs["action"])
         if widget_class == QSlider:
             widget.setOrientation(Qt.Orientation.Horizontal)
             widget.setRange(1, 100)
@@ -46,7 +57,7 @@ class MainWindow(QWidget):
 
             if "sld_lbl" in kwargs and "sld_num" in kwargs:
                 lbl, idx = kwargs["sld_lbl"], kwargs["sld_num"]
-                widget.valueChanged.connect(lambda val, lb=lbl, i=idx: lb.setText(f"{current_sliders[i]}: {val}"))
+                widget.valueChanged.connect(lambda val, lb=lbl, i=idx: self.slider_moved(val, lb, i))
 
         return widget
 
@@ -59,6 +70,8 @@ class MainWindow(QWidget):
         with open("assets/styles/style.qss", "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
         load_sounds()
+        self.effects_buttons = QButtonGroup(self)
+        self.effects_buttons.setExclusive(False)
 
         # STATIC WIDGETS
         self.image_display = self.make_widget(
@@ -78,21 +91,27 @@ class MainWindow(QWidget):
             widget_class=QPushButton,
             geometry=(screen_w, 44, 320, 168),
             name="example_img1",
-            wgt_type="example_img_btn"
+            wgt_type="example_img_btn",
+            img_path="assets/example images/img1.png",
+            action=self.display_example_image
         )
 
         self.example_img_btn2 = self.make_widget(
             widget_class=QPushButton,
             geometry=(screen_w, 208, 320, 168),
             name="example_img2",
-            wgt_type="example_img_btn"
+            wgt_type="example_img_btn",
+            img_path="assets/example images/img2.png",
+            action=self.display_example_image
         )
 
         self.example_img_btn3 = self.make_widget(
             widget_class=QPushButton,
             geometry=(screen_w, 372, 320, 168),
             name="example_img3",
-            wgt_type="example_img_btn"
+            wgt_type="example_img_btn",
+            img_path="assets/example images/img3.png",
+            action=self.display_example_image
         )
 
         # MENU WIDGETS
@@ -122,7 +141,6 @@ class MainWindow(QWidget):
             name="add_image_info"
         )
 
-
         # MAIN WIDGETS
         self.sliders_lbl = self.make_widget(
             widget_class=QLabel,
@@ -147,7 +165,7 @@ class MainWindow(QWidget):
 
         self.slider1_lbl = self.make_widget(
             widget_class=QLabel,
-            text=f"Brightness: {DEFAULT_VALUES["NO MODE"]["BRIGHTNESS"]}",
+            text=f"Brightness: {cfg.DEFAULT_VALUES['NO MODE']['BRIGHTNESS']}",
             geometry=(205, screen_h + 44, 300, 30),
             group="main_widgets",
             wgt_type="slider_label"
@@ -155,7 +173,7 @@ class MainWindow(QWidget):
 
         self.slider2_lbl = self.make_widget(
             widget_class=QLabel,
-            text=f"Saturation: {DEFAULT_VALUES["NO MODE"]["SATURATION"]}",
+            text=f"Saturation: {cfg.DEFAULT_VALUES['NO MODE']['SATURATION']}",
             geometry=(205, screen_h + 84, 300, 30),
             group="main_widgets",
             wgt_type="slider_label"
@@ -163,7 +181,7 @@ class MainWindow(QWidget):
 
         self.slider3_lbl = self.make_widget(
             widget_class=QLabel,
-            text=f"Contrast: {DEFAULT_VALUES["NO MODE"]["CONTRAST"]}",
+            text=f"Contrast: {cfg.DEFAULT_VALUES['NO MODE']['CONTRAST']}",
             geometry=(205, screen_h + 124, 300, 30),
             group="main_widgets",
             wgt_type="slider_label"
@@ -176,7 +194,7 @@ class MainWindow(QWidget):
             wgt_type="slider",
             sld_lbl=self.slider1_lbl,
             sld_num=0,
-            value=DEFAULT_VALUES["NO MODE"]["BRIGHTNESS"]
+            value=cfg.DEFAULT_VALUES["NO MODE"]["BRIGHTNESS"]
         )
 
         self.slider2 = self.make_widget(
@@ -186,7 +204,7 @@ class MainWindow(QWidget):
             wgt_type="slider",
             sld_lbl=self.slider2_lbl,
             sld_num=1,
-            value=DEFAULT_VALUES["NO MODE"]["SATURATION"]
+            value=cfg.DEFAULT_VALUES["NO MODE"]["SATURATION"]
         )
 
         self.slider3 = self.make_widget(
@@ -196,7 +214,7 @@ class MainWindow(QWidget):
             wgt_type="slider",
             sld_lbl=self.slider3_lbl,
             sld_num=2,
-            value=DEFAULT_VALUES["NO MODE"]["CONTRAST"]
+            value=cfg.DEFAULT_VALUES["NO MODE"]["CONTRAST"]
         )
 
         self.flipper_btn = self.make_widget(
@@ -205,7 +223,8 @@ class MainWindow(QWidget):
             geometry=(420, screen_h + 50, 150, 50),
             group="main_widgets",
             action=self.process_effect,
-            wgt_type="btn"
+            wgt_type="btn",
+            effect="FLIPPER"
         )
 
         self.fader_btn = self.make_widget(
@@ -214,7 +233,8 @@ class MainWindow(QWidget):
             geometry=(580, screen_h + 50, 150, 50),
             group="main_widgets",
             action=self.process_effect,
-            wgt_type="btn"
+            wgt_type="btn",
+            effect="FADER"
         )
 
         self.nuker_btn = self.make_widget(
@@ -223,7 +243,8 @@ class MainWindow(QWidget):
             geometry=(740, screen_h + 50, 150, 50),
             group="main_widgets",
             action=self.process_effect,
-            wgt_type="btn"
+            wgt_type="btn",
+            effect="NUKER"
         )
 
         self.puzzler_btn = self.make_widget(
@@ -232,7 +253,8 @@ class MainWindow(QWidget):
             geometry=(420, screen_h + 110, 150, 50),
             group="main_widgets",
             action=self.process_effect,
-            wgt_type="btn"
+            wgt_type="btn",
+            effect="PUZZLER"
         )
 
         self.liner_btn = self.make_widget(
@@ -241,7 +263,8 @@ class MainWindow(QWidget):
             geometry=(580, screen_h + 110, 150, 50),
             group="main_widgets",
             action=self.process_effect,
-            wgt_type="btn"
+            wgt_type="btn",
+            effect="LINER"
         )
 
         self.rainbower_btn = self.make_widget(
@@ -250,7 +273,8 @@ class MainWindow(QWidget):
             geometry=(740, screen_h + 110, 150, 50),
             group="main_widgets",
             action=self.process_effect,
-            wgt_type="btn"
+            wgt_type="btn",
+            effect="RAINBOWER"
         )
         # SETTINGS WIDGETS
         self.save_btn = self.make_widget(
@@ -288,7 +312,6 @@ class MainWindow(QWidget):
             action=self.process_effect,
             wgt_type="btn"
         )
-
         # self.hide_ui("main_widgets")
         self.hide_ui("menu_widgets")
 
@@ -311,8 +334,26 @@ class MainWindow(QWidget):
                     play(wgt_type, "click")
         return super().eventFilter(watched, event)
 
-    def process_effect(self):
-        pass
+    def highlight_button(self, btn: QPushButton):
+        """
+
+        """
+        for button in self.effects_buttons.buttons():
+            if button.isChecked() and button != btn:
+                button.setChecked(False)
+
+    @staticmethod
+    def slider_moved(value, label, index):
+        label.setText(f"{cfg.current_sliders[index]}: {value}")
+        cfg.current_values[cfg.current_effect][cfg.current_sliders[index]] = value
+
+    @staticmethod
+    def process_effect(effect, checked):
+        if checked:
+            cfg.current_effect = effect
+        else:
+            cfg.current_effect = "NO MODE"
+        print(cfg.current_effect)
 
     def open_file_dialog(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -325,6 +366,10 @@ class MainWindow(QWidget):
             print(f"Wybrano plik: {file_path}")
             pixmap = QPixmap(file_path)
             self.image_display.setPixmap(pixmap.scaled(self.image_display.size()))
+
+    def display_example_image(self, img_path):
+        pixmap = QPixmap(img_path)
+        self.image_display.setPixmap(pixmap.scaled(self.image_display.size()))
 
 
 def app_init():
