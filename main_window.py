@@ -1,7 +1,9 @@
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QFileDialog, QSlider, QButtonGroup
-from PySide6.QtGui import QPixmap, QMouseEvent
+from PySide6.QtGui import QPixmap, QMouseEvent, QImage
 from PySide6.QtCore import Qt, QEvent
-from src.sound_manager import play, load_sounds
+from engine import EffectsManager
+from src.utils import closest_window_res
+import src.sound_manager as sm
 import src.config as cfg
 
 
@@ -66,12 +68,16 @@ class MainWindow(QWidget):
         screen_w, screen_h = 960, 540
         ui_width, ui_height = 320, 170
         self.setWindowTitle("6FFECT")
-        self.resize(screen_w + ui_width, screen_h + ui_height)
+        self.setFixedSize(screen_w + ui_width, screen_h + ui_height)
         with open("assets/styles/style.qss", "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
-        load_sounds()
+        sm.load_sounds()
         self.effects_buttons = QButtonGroup(self)
         self.effects_buttons.setExclusive(False)
+        self.upload_image = None
+        self.effects_manager = EffectsManager()
+        self.effects_manager.frame_ready_signal.connect(self.display_image)
+        self.image_scaled = False
 
         # STATIC WIDGETS
         self.image_display = self.make_widget(
@@ -79,6 +85,7 @@ class MainWindow(QWidget):
             geometry=(0, 0, screen_w, screen_h),
             name="display"
         )
+        self.image_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.ex_img_label = self.make_widget(
             widget_class=QLabel,
@@ -93,7 +100,7 @@ class MainWindow(QWidget):
             name="example_img1",
             wgt_type="example_img_btn",
             img_path="assets/example images/img1.png",
-            action=self.display_example_image
+            action=self.prepare_image
         )
 
         self.example_img_btn2 = self.make_widget(
@@ -102,7 +109,7 @@ class MainWindow(QWidget):
             name="example_img2",
             wgt_type="example_img_btn",
             img_path="assets/example images/img2.png",
-            action=self.display_example_image
+            action=self.prepare_image
         )
 
         self.example_img_btn3 = self.make_widget(
@@ -111,7 +118,7 @@ class MainWindow(QWidget):
             name="example_img3",
             wgt_type="example_img_btn",
             img_path="assets/example images/img3.png",
-            action=self.display_example_image
+            action=self.prepare_image
         )
 
         # MENU WIDGETS
@@ -327,33 +334,37 @@ class MainWindow(QWidget):
         wgt_type = watched.property("WidgetType")
         if event.type() == QEvent.Type.Enter:
             if wgt_type in ("btn", "slider", "example_img_btn"):
-                play(wgt_type, "hover")
+                sm.play(wgt_type, "hover")
         elif isinstance(event, QMouseEvent) and event.type() == QEvent.Type.MouseButtonRelease:
             if event.button() == Qt.MouseButton.LeftButton and watched.rect().contains(event.position().toPoint()):
                 if wgt_type in ("btn", "example_img_btn"):
-                    play(wgt_type, "click")
+                    sm.play(wgt_type, "click")
         return super().eventFilter(watched, event)
 
-    def highlight_button(self, btn: QPushButton):
+    def highlight_button(self, current_button: QPushButton):
         """
-
+        Clears the checked state of the previously selected button.
+        Ensures that only a single button (or none) can be selected at a time.
         """
-        for button in self.effects_buttons.buttons():
-            if button.isChecked() and button != btn:
-                button.setChecked(False)
+        for effect_button in self.effects_buttons.buttons():
+            if effect_button.isChecked() and effect_button is not current_button:
+                effect_button.setChecked(False)
 
-    @staticmethod
-    def slider_moved(value, label, index):
-        label.setText(f"{cfg.current_sliders[index]}: {value}")
-        cfg.current_values[cfg.current_effect][cfg.current_sliders[index]] = value
+    def slider_moved(self, value, label, sld_index):
+        label.setText(f"{cfg.current_sliders[sld_index]}: {value}")
+        cfg.current_values[cfg.current_effect][cfg.current_sliders[sld_index]] = value
+        if cfg.current_effect == "NO MODE":
+            self.effects_manager.apply_no_mode_parameters()
+        else:
+            self.effects_manager.apply_effects_parameters(sld_index)
 
-    @staticmethod
-    def process_effect(effect, checked):
+    def process_effect(self, effect, checked):
         if checked:
             cfg.current_effect = effect
+            self.sliders_lbl.setText(f"PARAMETERS: {effect}")
         else:
             cfg.current_effect = "NO MODE"
-        print(cfg.current_effect)
+            self.sliders_lbl.setText(f"PARAMETERS: IMAGE")
 
     def open_file_dialog(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -364,12 +375,29 @@ class MainWindow(QWidget):
         )
         if file_path:
             print(f"Wybrano plik: {file_path}")
-            pixmap = QPixmap(file_path)
-            self.image_display.setPixmap(pixmap.scaled(self.image_display.size()))
+            self.prepare_image(file_path)
 
-    def display_example_image(self, img_path):
-        pixmap = QPixmap(img_path)
-        self.image_display.setPixmap(pixmap.scaled(self.image_display.size()))
+    def prepare_image(self, img_path):
+        """
+
+        """
+        self.upload_image = QImage(img_path)
+        target_resolution = closest_window_res(self.upload_image)
+        if target_resolution != "correct":
+            w, h = target_resolution
+            self.upload_image = self.upload_image.scaled(w, h)
+        self.effects_manager.load_image_variables(self.upload_image)
+        self.image_scaled = False
+        pixmap = QPixmap.fromImage(self.upload_image)
+        self.display_image(pixmap)
+        self.effects_manager.apply_no_mode_parameters()
+
+    def display_image(self, pixmap):
+        if pixmap.height() > pixmap.width():
+            new_width = int(pixmap.width() * (self.image_display.height() / pixmap.height()))
+            self.image_display.setPixmap(pixmap.scaled(new_width, self.image_display.height()))
+        else:
+            self.image_display.setPixmap(pixmap.scaled(self.image_display.size()))
 
 
 def app_init():
