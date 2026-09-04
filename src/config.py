@@ -5,41 +5,39 @@ DEFAULT_VALUES = {
         "CONTRAST": 20
     },
     "FLIPPER": {
-        "SPEED": 50,
-        "BLOCK SIZE": 5
+        "SPEED": 10,
+        "BLOCK SIZE": None
     },
     "FADER": {
-        "SPEED": 50,
+        "SPEED": 5,
         "HOLE SIZE": 30,
         "COVERAGE": 1
     },
     "NUKER": {
-        "SPEED": 60
+        "SPEED": 40
     },
     "PUZZLER": {
-        "SPEED": 80,
-        "BLOCK SIZE": 5
+        "SPEED": 10,
+        "BLOCK SIZE": None
     },
     "LINER": {
-        "STRENGTH": 5,
-        "GLITCH": False
+        "SPEED": 20,
     },
     "RAINBOWER": {
-        "SPEED": 70,
-        "BLOCK SIZE": 5,
+        "SPEED": 10,
+        "BLOCK SIZE": None,
         "SPREAD": 128
-    },
+    }
 }
 
 current_effect = "NO MODE"
-current_values = {mode: settings.copy() for mode, settings in DEFAULT_VALUES.items()}
-current_sliders = ("BRIGHTNESS", "SATURATION", "CONTRAST")
+current_values = {m: s.copy() for m, s in DEFAULT_VALUES.items()}
+current_sliders_parameters = ["BRIGHTNESS", "SATURATION", "CONTRAST"]
 
-# raw_range, ui_range, decimals
+# raw_range, ui_range, decimals. Used in ui_to_raw function (utils.py)
 NO_MODE_SLIDERS_SETTINGS = ((0.1, 5.0), (1, 100), 1)
 
-# convert_args contains tuple (raw_range, ui_range, decimals) used in ui_to_raw function (utils.py)
-SLIDERS_SETTINGS = {
+sliders_settings = {
     "NO MODE": {
         "BRIGHTNESS": {
             "ui_range": (1, 100)
@@ -54,68 +52,58 @@ SLIDERS_SETTINGS = {
 
     "FLIPPER": {
         "SPEED": {
-            "ui_range": (1, 100),
-            "convert_args": ((0.7, 0.9), (1, 100), 3)
+            "ui_range": (1, 10),
         },
         "BLOCK SIZE": {
-            "ui_range": (1, 5),
-            "convert_args": ((1, 5), (1, 5), 0)
+            "ui_range": None,
+            "range_values": None
         }
     },
 
     "FADER": {
         "SPEED": {
-            "ui_range": (1, 100),
-            "convert_args": ((0.85, 0.95), (1, 100), 3)
+            "ui_range": (1, 20),
         },
         "HOLE SIZE": {
-            "ui_range": (10, 100),
-            "convert_args": ((10, 100), (10, 100), 0)
+            "ui_range": (1, 100),
         },
         "COVERAGE": {
-            "ui_range": (1, 100),
-            "convert_args": ((0.1, 0.7), (1, 100), 3)
+            "ui_range": (1, 70),
         }
     },
 
     "NUKER": {
         "SPEED": {
             "ui_range": (1, 100),
-            "convert_args": ((0.93, 1.0), (1, 100), 3)
         }
     },
 
     "PUZZLER": {
         "SPEED": {
-            "ui_range": (1, 100),
-            "convert_args": ((0.82, 0.92), (1, 100), 3)
+            "ui_range": (1, 20),
         },
         "BLOCK SIZE": {
-            "ui_range": (1, 5),
-            "convert_args": ((1, 5), (1, 5), 0)
+            "ui_range": None,
+            "range_values": None
         }
     },
 
     "LINER": {
-        "STRENGTH": {
-            "ui_range": (1, 15),
-            "convert_args": ((1, 15), (1, 15), 0)
-        },
-        "GLITCH": False
+        "SPEED": {
+            "ui_range": (1, 100),
+        }
     },
 
     "RAINBOWER": {
         "SPEED": {
-            "ui_range": (1, 100),
-            "convert_args": ((0.83, 0.93), (1, 100), 3)
+            "ui_range": (1, 20),
         },
         "BLOCK SIZE": {
-            "ui_range": (1, 5),
-            "convert_args": ((1, 5), (1, 5), 0)
+            "ui_range": None,
+            "range_values": None
         },
         "SPREAD": {
             "ui_range": (1, 255),
-            "convert_args": ((1, 255), (1, 255), 0)
         }
     }
 }
