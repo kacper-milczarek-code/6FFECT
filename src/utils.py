@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from PySide6.QtGui import QImage
 from PIL import Image
 
@@ -57,6 +58,9 @@ def ndarray_to_qimage(arr: np.ndarray) -> QImage:
 
 
 def closest_window_res(img: QImage) -> tuple[int, int] | str:
+    """
+    Matches closest dimensions with a 16:9 or 9:16 aspect ratio to dimensions of the provided photo.
+    """
     res_horizontal = [(1920, 1080), (1600, 900), (1280, 720), (960, 540), (640, 360), (320, 180),
                       (256, 144), (240, 135), (192, 108), (160, 90), (32, 18), (16, 9)]
 
@@ -73,3 +77,22 @@ def closest_window_res(img: QImage) -> tuple[int, int] | str:
     else:
         return min(res_vertical, key=lambda r: abs(r[0] - w) + abs(r[1] - h))
 
+
+def calculate_block_sizes(width: int, height: int) -> list[int]:
+    """
+    Calculates correct block sizes for dividing an image with given dimensions.
+    Finds all common divisors of the width and height that are greater than or equal to 10 px.
+    """
+    min_val = 10
+    highest_bs = math.gcd(width, height)
+    block_sizes = set()
+
+    for i in range(1, math.isqrt(highest_bs) + 1):
+        if highest_bs % i == 0:
+            if i >= min_val:
+                block_sizes.add(i)
+            size = highest_bs // i
+            if size >= min_val:
+                block_sizes.add(size)
+
+    return sorted(list(block_sizes))
