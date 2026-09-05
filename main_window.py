@@ -21,16 +21,20 @@ class MainWindow(QWidget):
             action (callable): Callback function connected to the clicked signal.
             value (int): Initial value for QSlider widgets.
             sld_lbl (QLabel): Label object to display the slider's current name and value.
-            sld_num (int): Index key used to fetch slider names from current_sliders.
+            sld_idx (int): Index key used to fetch slider names from current_sliders.
             effect (str): Name of the effect associated with the button, passed to the action callback.
             img_path (str): File path to the image passed to the action callback, displayed by image_display.
         """
         widget = widget_class(self)
 
-        if "text" in kwargs: widget.setText(kwargs["text"])
-        if "geometry" in kwargs: widget.setGeometry(*kwargs["geometry"])
-        if "name" in kwargs: widget.setObjectName(kwargs["name"])
-        if "group" in kwargs: widget.setProperty("UIGroup", kwargs["group"])
+        if "text" in kwargs:
+            widget.setText(kwargs["text"])
+        if "geometry" in kwargs:
+            widget.setGeometry(*kwargs["geometry"])
+        if "name" in kwargs:
+            widget.setObjectName(kwargs["name"])
+        if "group" in kwargs:
+            widget.setProperty("UIGroup", kwargs["group"])
 
         if "wgt_type" in kwargs:
             wgt_type = kwargs["wgt_type"]
@@ -42,7 +46,8 @@ class MainWindow(QWidget):
             action = kwargs["action"]
             if "effect" in kwargs:
                 effect = kwargs["effect"]
-                widget.clicked.connect(lambda checked, w=widget: (self.highlight_button(w), action(effect, checked)))
+                widget.clicked.connect(
+                    lambda checked, w=widget: (self.highlight_effect_button(w), action(effect, checked)))
                 widget.setCheckable(True)
                 self.effects_buttons.addButton(widget)
             elif "img_path" in kwargs:
@@ -50,16 +55,16 @@ class MainWindow(QWidget):
                 widget.clicked.connect(lambda checked, p=img_path: action(p))
             else:
                 widget.clicked.connect(kwargs["action"])
-        if widget_class == QSlider:
+        if widget_class is QSlider:
             widget.setOrientation(Qt.Orientation.Horizontal)
             widget.setRange(1, 100)
 
             if "value" in kwargs:
                 widget.setValue(kwargs["value"])
 
-            if "sld_lbl" in kwargs and "sld_num" in kwargs:
-                lbl, idx = kwargs["sld_lbl"], kwargs["sld_num"]
-                widget.valueChanged.connect(lambda val, lb=lbl, i=idx: self.slider_moved(val, lb, i))
+            if "sld_lbl" in kwargs and "sld_idx" in kwargs:
+                lbl, idx = kwargs["sld_lbl"], kwargs["sld_idx"]
+                widget.valueChanged.connect(lambda val, lb=lbl, i=idx: self.handle_slider_moved(val, lb, i))
 
         return widget
 
@@ -76,6 +81,7 @@ class MainWindow(QWidget):
         self.effects_buttons.setExclusive(False)
         self.upload_image = None
         self.effects_manager = EffectsManager()
+        self.effects_manager.start()
         self.effects_manager.frame_ready_signal.connect(self.display_image)
         self.image_scaled = False
 
@@ -200,7 +206,7 @@ class MainWindow(QWidget):
             group="main_widgets",
             wgt_type="slider",
             sld_lbl=self.slider1_lbl,
-            sld_num=0,
+            sld_idx=0,
             value=cfg.DEFAULT_VALUES["NO MODE"]["BRIGHTNESS"]
         )
 
@@ -210,7 +216,7 @@ class MainWindow(QWidget):
             group="main_widgets",
             wgt_type="slider",
             sld_lbl=self.slider2_lbl,
-            sld_num=1,
+            sld_idx=1,
             value=cfg.DEFAULT_VALUES["NO MODE"]["SATURATION"]
         )
 
@@ -220,7 +226,7 @@ class MainWindow(QWidget):
             group="main_widgets",
             wgt_type="slider",
             sld_lbl=self.slider3_lbl,
-            sld_num=2,
+            sld_idx=2,
             value=cfg.DEFAULT_VALUES["NO MODE"]["CONTRAST"]
         )
 
@@ -229,7 +235,7 @@ class MainWindow(QWidget):
             text="FLIPPER",
             geometry=(420, screen_h + 50, 150, 50),
             group="main_widgets",
-            action=self.process_effect,
+            action=self.handle_effect_btn_click,
             wgt_type="btn",
             effect="FLIPPER"
         )
@@ -239,7 +245,7 @@ class MainWindow(QWidget):
             text="FADER",
             geometry=(580, screen_h + 50, 150, 50),
             group="main_widgets",
-            action=self.process_effect,
+            action=self.handle_effect_btn_click,
             wgt_type="btn",
             effect="FADER"
         )
@@ -249,7 +255,7 @@ class MainWindow(QWidget):
             text="NUKER",
             geometry=(740, screen_h + 50, 150, 50),
             group="main_widgets",
-            action=self.process_effect,
+            action=self.handle_effect_btn_click,
             wgt_type="btn",
             effect="NUKER"
         )
@@ -259,7 +265,7 @@ class MainWindow(QWidget):
             text="PUZZLER",
             geometry=(420, screen_h + 110, 150, 50),
             group="main_widgets",
-            action=self.process_effect,
+            action=self.handle_effect_btn_click,
             wgt_type="btn",
             effect="PUZZLER"
         )
@@ -269,7 +275,7 @@ class MainWindow(QWidget):
             text="LINER",
             geometry=(580, screen_h + 110, 150, 50),
             group="main_widgets",
-            action=self.process_effect,
+            action=self.handle_effect_btn_click,
             wgt_type="btn",
             effect="LINER"
         )
@@ -279,7 +285,7 @@ class MainWindow(QWidget):
             text="RAINBOWER",
             geometry=(740, screen_h + 110, 150, 50),
             group="main_widgets",
-            action=self.process_effect,
+            action=self.handle_effect_btn_click,
             wgt_type="btn",
             effect="RAINBOWER"
         )
@@ -289,7 +295,7 @@ class MainWindow(QWidget):
             text="SAVE",
             geometry=(965, screen_h + 50, 150, 50),
             group="main_widgets",
-            action=self.process_effect,
+            action=self.handle_effect_btn_click,
             wgt_type="btn"
         )
 
@@ -298,7 +304,7 @@ class MainWindow(QWidget):
             text="NEW IMAGE",
             geometry=(1125, screen_h + 50, 150, 50),
             group="main_widgets",
-            action=self.process_effect,
+            action=self.handle_effect_btn_click,
             wgt_type="btn"
         )
 
@@ -307,7 +313,7 @@ class MainWindow(QWidget):
             text="RESET",
             geometry=(965, screen_h + 110, 150, 50),
             group="main_widgets",
-            action=self.process_effect,
+            action=self.handle_effect_btn_click,
             wgt_type="btn"
         )
 
@@ -316,9 +322,30 @@ class MainWindow(QWidget):
             text="MUTE SOUNDS",
             geometry=(1125, screen_h + 110, 150, 50),
             group="main_widgets",
-            action=self.process_effect,
+            action=self.handle_effect_btn_click,
             wgt_type="btn"
         )
+
+        self.liner_switch_btn = self.make_widget(
+            widget_class=QPushButton,
+            text="GLITCH",
+            geometry=(5, screen_h + 80, 190, 80),
+            group="main_widgets",
+            wgt_type="btn",
+            name="liner_switch",
+            action=lambda checked: self.handle_liner_switch_btn_click(checked)
+        )
+        self.liner_switch_btn.setCheckable(True)
+
+        self.liner_switch_lbl = self.make_widget(
+            widget_class=QLabel,
+            text="ON / [OFF]",
+            geometry=(205, screen_h + 100, 300, 30),
+            group="main_widgets",
+            wgt_type="slider_label"
+        )
+        self.liner_switch_btn.hide()
+        self.liner_switch_lbl.hide()
         # self.hide_ui("main_widgets")
         self.hide_ui("menu_widgets")
 
@@ -341,30 +368,75 @@ class MainWindow(QWidget):
                     sm.play(wgt_type, "click")
         return super().eventFilter(watched, event)
 
-    def highlight_button(self, current_button: QPushButton):
+    def highlight_effect_button(self, current_button: QPushButton):
         """
-        Clears the checked state of the previously selected button.
+        Clears checked state of previously selected button.
         Ensures that only a single button (or none) can be selected at a time.
         """
         for effect_button in self.effects_buttons.buttons():
             if effect_button.isChecked() and effect_button is not current_button:
                 effect_button.setChecked(False)
 
-    def slider_moved(self, value, label, sld_index):
-        label.setText(f"{cfg.current_sliders[sld_index]}: {value}")
-        cfg.current_values[cfg.current_effect][cfg.current_sliders[sld_index]] = value
+    def handle_slider_moved(self, value, label, sld_index):
+        """
+        Processes slider movement and calls functions handling slider values.
+        """
+        label.setText(f"{cfg.current_sliders_parameters[sld_index]}: {value}")
+        cfg.current_values[cfg.current_effect][cfg.current_sliders_parameters[sld_index]] = value
         if cfg.current_effect == "NO MODE":
             self.effects_manager.apply_no_mode_parameters()
         else:
-            self.effects_manager.apply_effects_parameters(sld_index)
+            self.effects_manager.apply_effects_parameters(cfg.current_sliders_parameters[sld_index], value)
 
-    def process_effect(self, effect, checked):
+    def change_sliders(self):
+        """
+        Updates slider section corresponding with selected effect.
+        """
+        sliders_labels = (self.slider1_lbl, self.slider2_lbl, self.slider3_lbl)
+        sliders = (self.slider1, self.slider2, self.slider3)
+        [(sld_lab.hide(), sld.hide()) for sld_lab, sld in zip(sliders_labels, sliders)]
+        [s.hide() for s in sliders]
+        for i in range(len(cfg.current_sliders_parameters)):
+            parameter = cfg.current_sliders_parameters[i]
+            value = cfg.current_values[cfg.current_effect][parameter]
+            slider_range = cfg.sliders_settings[cfg.current_effect][parameter]["ui_range"]
+            sliders_labels[i].setText(f"{parameter}: {value}")
+            sliders_labels[i].show()
+            sliders[i].setRange(*slider_range)
+            sliders[i].setValue(value)
+            sliders[i].show()
+
+    def handle_effect_btn_click(self, effect: str, checked: bool):
         if checked:
+            if effect == "LINER":
+                self.liner_switch_btn.show()
+                self.liner_switch_lbl.show()
+            else:
+                self.liner_switch_btn.hide()
+                self.liner_switch_lbl.hide()
             cfg.current_effect = effect
+            cfg.current_sliders_parameters = [param for param in cfg.sliders_settings[cfg.current_effect].keys()]
+            self.effects_manager.update_block_size()
+            self.change_sliders()
             self.sliders_lbl.setText(f"PARAMETERS: {effect}")
+            self.effects_manager.init_effects_loop_variables()
         else:
+            if effect == "LINER":
+                self.liner_switch_btn.hide()
+                self.liner_switch_lbl.hide()
             cfg.current_effect = "NO MODE"
+            cfg.current_sliders_parameters = [param for param in cfg.sliders_settings[cfg.current_effect].keys()]
+            self.change_sliders()
             self.sliders_lbl.setText(f"PARAMETERS: IMAGE")
+            self.effects_manager.pause()
+
+    def handle_liner_switch_btn_click(self, checked: bool):
+        if checked:
+            self.liner_switch_lbl.setText("[ON] / OFF")
+            self.effects_manager.set_liner_glitch_mode(True)
+        else:
+            self.liner_switch_lbl.setText("ON / [OFF]")
+            self.effects_manager.set_liner_glitch_mode(False)
 
     def open_file_dialog(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -377,9 +449,11 @@ class MainWindow(QWidget):
             print(f"Wybrano plik: {file_path}")
             self.prepare_image(file_path)
 
-    def prepare_image(self, img_path):
+    def prepare_image(self, img_path: str):
         """
-
+        Prepares image for effects application.
+        Converts image to 16:9 or 9:16 format.
+        Triggers initialization of image and effect loop variables.
         """
         self.upload_image = QImage(img_path)
         target_resolution = closest_window_res(self.upload_image)
@@ -387,17 +461,31 @@ class MainWindow(QWidget):
             w, h = target_resolution
             self.upload_image = self.upload_image.scaled(w, h)
         self.effects_manager.load_image_variables(self.upload_image)
-        self.image_scaled = False
-        pixmap = QPixmap.fromImage(self.upload_image)
-        self.display_image(pixmap)
-        self.effects_manager.apply_no_mode_parameters()
+        self.effects_manager.init_effects_loop_variables()
 
-    def display_image(self, pixmap):
+    def display_image(self, image: QImage):
+        """
+        Adjusts the image size to the display and displays it.
+        """
+        pixmap = QPixmap.fromImage(image)
         if pixmap.height() > pixmap.width():
             new_width = int(pixmap.width() * (self.image_display.height() / pixmap.height()))
             self.image_display.setPixmap(pixmap.scaled(new_width, self.image_display.height()))
         else:
             self.image_display.setPixmap(pixmap.scaled(self.image_display.size()))
+
+    def closeEvent(self, event):
+        """
+        Handles window close event.
+        Ensures proper termination of EffectsManager thread.
+        Prevents thread-related memory leaks.
+        """
+
+        if self.effects_manager.isRunning():
+            self.effects_manager.is_running = False
+            self.effects_manager.wait()
+
+        event.accept()
 
 
 def app_init():
