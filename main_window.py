@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QFileDialog, QSlider, QButtonGroup
 from PySide6.QtGui import QPixmap, QMouseEvent, QImage
-from PySide6.QtCore import Qt, QEvent
+from PySide6.QtCore import Qt, QEvent, QCoreApplication
 from engine import EffectsManager
 from src.utils import closest_window_res
 import src.sound_manager as sm
@@ -83,7 +83,7 @@ class MainWindow(QWidget):
         self.effects_manager = EffectsManager()
         self.effects_manager.start()
         self.effects_manager.frame_ready_signal.connect(self.display_image)
-        self.image_scaled = False
+        self.current_ui = "menu_widgets"
 
         # STATIC WIDGETS
         self.image_display = self.make_widget(
@@ -178,7 +178,7 @@ class MainWindow(QWidget):
 
         self.slider1_lbl = self.make_widget(
             widget_class=QLabel,
-            text=f"Brightness: {cfg.DEFAULT_VALUES['NO MODE']['BRIGHTNESS']}",
+            text=f"BRIGHTNESS: {cfg.DEFAULT_VALUES['NO MODE']['BRIGHTNESS']}",
             geometry=(205, screen_h + 44, 300, 30),
             group="main_widgets",
             wgt_type="slider_label"
@@ -186,7 +186,7 @@ class MainWindow(QWidget):
 
         self.slider2_lbl = self.make_widget(
             widget_class=QLabel,
-            text=f"Saturation: {cfg.DEFAULT_VALUES['NO MODE']['SATURATION']}",
+            text=f"SATURATION: {cfg.DEFAULT_VALUES['NO MODE']['SATURATION']}",
             geometry=(205, screen_h + 84, 300, 30),
             group="main_widgets",
             wgt_type="slider_label"
@@ -194,7 +194,7 @@ class MainWindow(QWidget):
 
         self.slider3_lbl = self.make_widget(
             widget_class=QLabel,
-            text=f"Contrast: {cfg.DEFAULT_VALUES['NO MODE']['CONTRAST']}",
+            text=f"CONTRAST: {cfg.DEFAULT_VALUES['NO MODE']['CONTRAST']}",
             geometry=(205, screen_h + 124, 300, 30),
             group="main_widgets",
             wgt_type="slider_label"
@@ -292,7 +292,7 @@ class MainWindow(QWidget):
         # SETTINGS WIDGETS
         self.save_btn = self.make_widget(
             widget_class=QPushButton,
-            text="SAVE",
+            text="SAVE VIDEO",
             geometry=(965, screen_h + 50, 150, 50),
             group="main_widgets",
             action=self.handle_effect_btn_click,
@@ -304,7 +304,7 @@ class MainWindow(QWidget):
             text="NEW IMAGE",
             geometry=(1125, screen_h + 50, 150, 50),
             group="main_widgets",
-            action=self.handle_effect_btn_click,
+            action=self.reset_ui_to_image_chooser,
             wgt_type="btn"
         )
 
@@ -313,7 +313,7 @@ class MainWindow(QWidget):
             text="RESET",
             geometry=(965, screen_h + 110, 150, 50),
             group="main_widgets",
-            action=self.handle_effect_btn_click,
+            action=self.reset_to_default_values,
             wgt_type="btn"
         )
 
@@ -322,9 +322,11 @@ class MainWindow(QWidget):
             text="MUTE SOUNDS",
             geometry=(1125, screen_h + 110, 150, 50),
             group="main_widgets",
-            action=self.handle_effect_btn_click,
-            wgt_type="btn"
+            action=sm.toggle_mute,
+            wgt_type="btn",
+            name="mute"
         )
+        self.mute_btn.setCheckable(True)
 
         self.liner_switch_btn = self.make_widget(
             widget_class=QPushButton,
@@ -346,13 +348,21 @@ class MainWindow(QWidget):
         )
         self.liner_switch_btn.hide()
         self.liner_switch_lbl.hide()
-        # self.hide_ui("main_widgets")
-        self.hide_ui("menu_widgets")
+        self.switch_ui_to("menu_widgets")
 
-    def hide_ui(self, ui_group: str):
+    def switch_ui_to(self, ui_group: str):
+        self.current_ui = ui_group
+        if ui_group == "main_widgets":
+            show_ui = "main_widgets"
+            hide_ui = "menu_widgets"
+        else:
+            show_ui = "menu_widgets"
+            hide_ui = "main_widgets"
         for widget in self.findChildren(QWidget):
-            if widget.property("UIGroup") == ui_group:
+            if widget.property("UIGroup") == hide_ui:
                 widget.hide()
+            if widget.property("UIGroup") == show_ui and widget not in (self.liner_switch_btn, self.liner_switch_lbl):
+                widget.show()
 
     def eventFilter(self, watched: QWidget, event, /):
         """
@@ -401,10 +411,38 @@ class MainWindow(QWidget):
             value = cfg.current_values[cfg.current_effect][parameter]
             slider_range = cfg.sliders_settings[cfg.current_effect][parameter]["ui_range"]
             sliders_labels[i].setText(f"{parameter}: {value}")
-            sliders_labels[i].show()
             sliders[i].setRange(*slider_range)
             sliders[i].setValue(value)
-            sliders[i].show()
+            if self.current_ui != "menu_widgets":
+                sliders_labels[i].show()
+                sliders[i].show()
+
+    def reset_to_default_values(self):
+        """
+        Resets all values in cfg.current_values to default values in cfg.DEFAULT_VALUES.
+        Resets effect and widget settings to default values.
+        Switches ui to menu_widgets.
+        """
+        cfg.current_values = {m: s.copy() for m, s in cfg.DEFAULT_VALUES.items()}
+        self.effects_manager.update_block_size()
+        self.effects_manager.apply_no_mode_parameters()
+        self.effects_manager.init_effects_loop_variables()
+        self.handle_liner_switch_btn_click(False)
+        self.liner_switch_btn.setChecked(False)
+        self.change_sliders()
+
+    def reset_ui_to_image_chooser(self):
+        self.reset_to_default_values()
+        self.switch_ui_to("menu_widgets")
+        self.sliders_lbl.setText("PARAMETERS: IMAGE")
+        self.effects_manager.is_paused = True
+        self.image_display.clear()
+        cfg.current_effect = "NO MODE"
+        cfg.current_sliders_parameters = ["BRIGHTNESS", "SATURATION", "CONTRAST"]
+        self.change_sliders()
+        for effect_button in self.effects_buttons.buttons():
+            if effect_button.isChecked():
+                effect_button.setChecked(False)
 
     def handle_effect_btn_click(self, effect: str, checked: bool):
         if checked:
@@ -421,14 +459,15 @@ class MainWindow(QWidget):
             self.sliders_lbl.setText(f"PARAMETERS: {effect}")
             self.effects_manager.init_effects_loop_variables()
         else:
-            if effect == "LINER":
-                self.liner_switch_btn.hide()
-                self.liner_switch_lbl.hide()
             cfg.current_effect = "NO MODE"
             cfg.current_sliders_parameters = [param for param in cfg.sliders_settings[cfg.current_effect].keys()]
             self.change_sliders()
             self.sliders_lbl.setText(f"PARAMETERS: IMAGE")
+            self.effects_manager.emit_clean_frame = True
             self.effects_manager.pause()
+            if effect == "LINER":
+                self.liner_switch_btn.hide()
+                self.liner_switch_lbl.hide()
 
     def handle_liner_switch_btn_click(self, checked: bool):
         if checked:
@@ -455,6 +494,7 @@ class MainWindow(QWidget):
         Converts image to 16:9 or 9:16 format.
         Triggers initialization of image and effect loop variables.
         """
+        self.switch_ui_to("main_widgets")
         self.upload_image = QImage(img_path)
         target_resolution = closest_window_res(self.upload_image)
         if target_resolution != "correct":
@@ -467,12 +507,13 @@ class MainWindow(QWidget):
         """
         Adjusts the image size to the display and displays it.
         """
-        pixmap = QPixmap.fromImage(image)
-        if pixmap.height() > pixmap.width():
-            new_width = int(pixmap.width() * (self.image_display.height() / pixmap.height()))
-            self.image_display.setPixmap(pixmap.scaled(new_width, self.image_display.height()))
-        else:
-            self.image_display.setPixmap(pixmap.scaled(self.image_display.size()))
+        if self.current_ui != "menu_widgets":
+            pixmap = QPixmap.fromImage(image)
+            if pixmap.height() > pixmap.width():
+                new_width = int(pixmap.width() * (self.image_display.height() / pixmap.height()))
+                self.image_display.setPixmap(pixmap.scaled(new_width, self.image_display.height()))
+            else:
+                self.image_display.setPixmap(pixmap.scaled(self.image_display.size()))
 
     def closeEvent(self, event):
         """
@@ -480,9 +521,8 @@ class MainWindow(QWidget):
         Ensures proper termination of EffectsManager thread.
         Prevents thread-related memory leaks.
         """
-
         if self.effects_manager.isRunning():
-            self.effects_manager.is_running = False
+            self.effects_manager.stop()
             self.effects_manager.wait()
 
         event.accept()

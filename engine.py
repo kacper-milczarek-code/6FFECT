@@ -1,4 +1,4 @@
-from PySide6.QtCore import QThread, Signal
+from PySide6.QtCore import QThread, Signal, QMutex, QMutexLocker, QWaitCondition
 from PySide6.QtGui import QImage
 from PIL.ImageQt import toqimage
 import src.utils as utils
@@ -72,10 +72,20 @@ class EffectsManager(QThread):
         self.qimage = None
         self.np_img = None
         self.image_pil = None
+
+        self.mutex = QMutex()
+        self.pause_condition = QWaitCondition()
+
         self.is_running = True
         self.is_paused = True
+        self.closing_thread = False
+        self.emit_clean_frame = False
+        self.clear_display = False
+        self.clear_display = False
+
         self.process_effects = ProcessEffects()
         self.fps = None
+
         self.params_setters = {
             "SPEED": lambda v: setattr(self, "fps", v),
             "HOLE SIZE": lambda v: setattr(self.process_effects, "hole_size", v),
@@ -108,7 +118,7 @@ class EffectsManager(QThread):
         self.process_effects.rainbower_spread = cfg.current_values["RAINBOWER"]["SPREAD"]
         if cfg.current_effect != "NO MODE":
             self.fps = cfg.current_values[cfg.current_effect]["SPEED"]
-            self.is_paused = False
+            self.resume()
 
     def update_block_size(self):
         block_sizes = utils.calculate_block_sizes(self.qimage.width(), self.qimage.height())
@@ -120,17 +130,46 @@ class EffectsManager(QThread):
 
     def run(self):
         while self.is_running:
-            if not self.is_paused:
-                if cfg.current_effect != "NO MODE":
-                    frame = self.effects_callables[cfg.current_effect]()
-                    if isinstance(frame, QImage):
-                        self.frame_ready_signal.emit(frame)
+            with QMutexLocker(self.mutex):
+                while self.is_paused:
+                    if self.emit_clean_frame:
+                        self.frame_ready_signal.emit(self.qimage.copy())
+                        self.emit_clean_frame = False
+                    self.pause_condition.wait(self.mutex)
+
+            if cfg.current_effect != "NO MODE":
+                frame = self.effects_callables[cfg.current_effect]()
+                if isinstance(frame, QImage):
+                    self.frame_ready_signal.emit(frame)
+            if not self.closing_thread:
                 self.msleep(int(1000 / self.fps))
-            else:
-                self.msleep(100)
 
     def pause(self):
-        self.is_paused = True
+        """
+        Switches the worker thread from frame-emitting loop to waiting loop.
+        """
+        with QMutexLocker(self.mutex):
+            self.is_paused = True
+
+    def resume(self):
+        """
+        Switches the worker thread from waiting loop to frame-emitting loop .
+        """
+        with QMutexLocker(self.mutex):
+            self.is_running = True
+            self.is_paused = False
+            self.pause_condition.wakeAll()
+
+    def stop(self):
+        """
+        Stops the worker thread.
+        Used only when closing the application via closeEvent.
+        """
+        with QMutexLocker(self.mutex):
+            self.closing_thread = True
+            self.is_running = False
+            self.is_paused = False
+            self.pause_condition.wakeAll()
 
     def apply_effects_parameters(self, parameter: str, value: int):
         """
