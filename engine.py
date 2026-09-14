@@ -27,23 +27,19 @@ class ProcessEffects:
 
     def process_flipper(self) -> QImage:
         self.curr_np_img = effects.flipper(self.curr_np_img, self.img_h, self.img_w, self.curr_block_size)
-        frame = utils.ndarray_to_qimage(self.curr_np_img)
-        return frame
+        return self.curr_np_img
 
     def process_fader(self) -> QImage:
         frame_np = effects.fader(self.curr_np_img, self.img_h, self.img_w, self.coverage, self.hole_size)
-        frame = utils.ndarray_to_qimage(frame_np)
-        return frame
+        return frame_np
 
     def process_nuker(self) -> QImage:
         self.curr_np_img = effects.nuker(self.curr_np_img)
-        frame = utils.ndarray_to_qimage(self.curr_np_img)
-        return frame
+        return self.curr_np_img
 
     def process_puzzler(self) -> QImage:
         frame_np = effects.puzzler(self.curr_np_img, self.img_h, self.img_w, self.curr_block_size)
-        frame = utils.ndarray_to_qimage(frame_np)
-        return frame
+        return frame_np
 
     def process_liner(self) -> QImage:
         if self.positions.size == 0:
@@ -53,18 +49,17 @@ class ProcessEffects:
         self.curr_np_img = effects.liner(self.curr_np_img, self.liner_strength, self.positions,
                                          self.fade, self.clean_np_img, self.liner_glitch_mode)
         self.positions = np.delete(self.positions, slice(0, self.liner_strength))
-        frame = utils.ndarray_to_qimage(self.curr_np_img)
-        return frame
+        return self.curr_np_img
 
     def process_rainbower(self) -> QImage:
         frame_np = effects.rainbower(self.curr_np_img, self.img_h, self.img_w,
                                      self.curr_block_size, self.rainbower_spread)
-        frame = utils.ndarray_to_qimage(frame_np)
-        return frame
+        return frame_np
 
 
 class EffectsManager(QThread):
-    frame_ready_signal = Signal(QImage)
+    display_frame_ready_signal = Signal(QImage)
+    save_frame_ready_signal = Signal(np.ndarray)
 
     def __init__(self):
         super().__init__()
@@ -80,10 +75,10 @@ class EffectsManager(QThread):
         self.is_paused = True
         self.closing_thread = False
         self.emit_clean_frame = False
-        self.clear_display = False
-        self.clear_display = False
+        self.emit_frame_for_save = False
 
         self.process_effects = ProcessEffects()
+
         self.fps = None
 
         self.params_setters = {
@@ -110,12 +105,14 @@ class EffectsManager(QThread):
         self.process_effects.img_w = self.qimage.width()
         self.process_effects.img_h = self.qimage.height()
         self.process_effects.curr_np_img = self.np_img.copy()
+        self.process_effects.clean_np_img = self.np_img.copy()
+
         self.process_effects.coverage = cfg.current_values["FADER"]["COVERAGE"]
         self.process_effects.hole_size = cfg.current_values["FADER"]["HOLE SIZE"]
-        self.process_effects.clean_np_img = self.np_img.copy()
         self.process_effects.fade = False
         self.process_effects.positions = np.array([])
         self.process_effects.rainbower_spread = cfg.current_values["RAINBOWER"]["SPREAD"]
+
         if cfg.current_effect != "NO MODE":
             self.fps = cfg.current_values[cfg.current_effect]["SPEED"]
             self.resume()
@@ -133,14 +130,17 @@ class EffectsManager(QThread):
             with QMutexLocker(self.mutex):
                 while self.is_paused:
                     if self.emit_clean_frame:
-                        self.frame_ready_signal.emit(self.qimage.copy())
+                        self.display_frame_ready_signal.emit(self.qimage.copy())
                         self.emit_clean_frame = False
                     self.pause_condition.wait(self.mutex)
 
             if cfg.current_effect != "NO MODE":
-                frame = self.effects_callables[cfg.current_effect]()
-                if isinstance(frame, QImage):
-                    self.frame_ready_signal.emit(frame)
+                frame_np = self.effects_callables[cfg.current_effect]()
+                if isinstance(frame_np, np.ndarray):
+                    if self.emit_frame_for_save:
+                        self.save_frame_ready_signal.emit(frame_np.copy())
+                    self.display_frame_ready_signal.emit(utils.ndarray_to_qimage(frame_np))
+
             if not self.closing_thread:
                 self.msleep(int(1000 / self.fps))
 
@@ -197,10 +197,17 @@ class EffectsManager(QThread):
         self.qimage = toqimage(pil_image)
         self.np_img = utils.qimage_to_ndarray(self.qimage)
         if cfg.current_effect == "NO MODE":
-            self.frame_ready_signal.emit(self.qimage)
+            self.display_frame_ready_signal.emit(self.qimage)
 
     def set_liner_glitch_mode(self, mode: bool):
         self.process_effects.liner_glitch_mode = mode
         self.process_effects.fade = False
         self.process_effects.positions = np.array([])
         self.process_effects.curr_np_img = self.np_img.copy()
+
+    def start_export(self):
+        self.emit_frame_for_save = True
+
+    def stop_export(self):
+        self.emit_frame_for_save = False
+

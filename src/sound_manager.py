@@ -1,10 +1,8 @@
 from PySide6.QtCore import QUrl, QElapsedTimer
 from PySide6.QtMultimedia import QSoundEffect
 
-
 SOUND_VOLUME = 0.3
 SOUND_COOLDOWNS = {"hover": 150, "click": 50}
-
 
 muted = False
 
@@ -48,7 +46,6 @@ def load_sounds():
 def play(wgt_type, event_type):
     if muted:
         return
-
 
     sound = loaded_sounds[wgt_type][event_type]
 

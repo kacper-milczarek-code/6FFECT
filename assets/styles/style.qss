@@ -13,7 +13,6 @@ QLabel {
     color: #00FFFA;
     font-size: 24px;
     font-weight: bold;
-    text-transform: uppercase;
 }
 
 QPushButton {
@@ -36,12 +35,17 @@ QPushButton:pressed {
 }
 
 QPushButton:checked {
+    background-color: #080830;
     border: 5px solid #00FFFA;
     border-radius: 10px;
 }
 
 QPushButton:checked:hover {
     background-color: #123BA8;
+}
+
+QPushButton:checked:pressed {
+    background-color: #030B1F;
 }
 
 QSlider::groove:horizontal {
@@ -96,10 +100,32 @@ QLabel#add_image_info {
 QPushButton#upload {
     font-size: 40px;
     font-weight: 900;
+    border: 5px solid #00FFFA;
+    border-radius: 30px;
+}
+
+QPushButton#mute:checked {
+    background-color: #080830;
+    border: 5px solid #00FFFA;
+    border-radius: 10px;
+}
+
+QPushButton#liner_switch:checked {
+    background-color: #080830;
+    border: 5px solid #00FFFA;
+    border-radius: 10px;
 }
 
 QLabel[WidgetType="slider_label"] {
     font-size: 18px;
+}
+
+QLabel#duration, QLabel#video_format {
+    font-size: 18px;
+}
+
+QLabel#success {
+    font-size: 15px;
 }
 
 QPushButton#example_img1,
@@ -127,3 +153,22 @@ QPushButton#example_img2:pressed  { background-image: url("assets/example images
 QPushButton#example_img3          { background-image: url("assets/example images/thumbnails/img3.png"); }
 QPushButton#example_img3:hover    { background-image: url("assets/example images/thumbnails/img3hover.png"); }
 QPushButton#example_img3:pressed  { background-image: url("assets/example images/thumbnails/img3click.png"); }
+
+
+
+QProgressBar {
+    border: 2px solid #00FFFA;
+    border-radius: 10px;
+    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #020212, stop:1 #0A0A3A);
+    text-align: center;
+    color: #00FFFA;
+    font-weight: bold;
+    height: 22px;
+    padding: 2px;
+}
+
+QProgressBar::chunk {
+    background-color: #00FFFA;
+    border-radius: 5px;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #070875, stop:1 #00FFFA);
+}

@@ -1,17 +1,19 @@
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QFileDialog, QSlider, QButtonGroup
 from PySide6.QtGui import QPixmap, QMouseEvent, QImage
-from PySide6.QtCore import Qt, QEvent, QCoreApplication
+from PySide6.QtCore import Qt, QEvent
 from engine import EffectsManager
+from effect_export_ui import ExportDialogs
+from video_exporter import VideoExporter
 from src.utils import closest_window_res
-import src.sound_manager as sm
+import src.sound_manager as sound_manager
 import src.config as cfg
 
 
 class MainWindow(QWidget):
 
     def make_widget(self, widget_class, **kwargs):
-        """
-        Universal function for creating and configuring Qt widgets
+        """Universal function for creating and configuring Qt widgets
+
         Kwargs:
             text (str): Set widget text via setText
             geometry (tuple[int, int, int, int]): Widget coordinates and size (x, y, width, height).
@@ -76,13 +78,26 @@ class MainWindow(QWidget):
         self.setFixedSize(screen_w + ui_width, screen_h + ui_height)
         with open("assets/styles/style.qss", "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
-        sm.load_sounds()
+        sound_manager.load_sounds()
         self.effects_buttons = QButtonGroup(self)
         self.effects_buttons.setExclusive(False)
         self.upload_image = None
+
+        self.export_dialogs = ExportDialogs()
         self.effects_manager = EffectsManager()
+        self.video_exporter = VideoExporter()
+
         self.effects_manager.start()
-        self.effects_manager.frame_ready_signal.connect(self.display_image)
+        self.effects_manager.display_frame_ready_signal.connect(self.display_image)
+
+        self.export_dialogs.export_request_signal.connect(self.handle_start_export)
+        self.export_dialogs.progress_dialog.cancel_saving_signal.connect(self.handle_cancel_export)
+
+        self.effects_manager.save_frame_ready_signal.connect(self.video_exporter.add_frame)
+
+        self.video_exporter.update_progress_bar_value.connect(self.export_dialogs.update_progress_bar_value)
+        self.video_exporter.export_finished_signal.connect(self.handle_finish_export)
+
         self.current_ui = "menu_widgets"
 
         # STATIC WIDGETS
@@ -96,7 +111,7 @@ class MainWindow(QWidget):
         self.ex_img_label = self.make_widget(
             widget_class=QLabel,
             text="Example images",
-            geometry=(screen_w + 35, 7, 250, 30),
+            geometry=(screen_w + 50, 7, 250, 30),
             name="ui_labels"
         )
 
@@ -149,7 +164,7 @@ class MainWindow(QWidget):
         self.additional_info_lbl = self.make_widget(
             widget_class=QLabel,
             text="Drop anywhere or choose an example",
-            geometry=(100, 360, 800, 30),
+            geometry=(155, 360, 650, 40),
             group="menu_widgets",
             name="add_image_info"
         )
@@ -295,7 +310,7 @@ class MainWindow(QWidget):
             text="SAVE VIDEO",
             geometry=(965, screen_h + 50, 150, 50),
             group="main_widgets",
-            action=self.handle_effect_btn_click,
+            action=self.export_dialogs.launch_export_ui,
             wgt_type="btn"
         )
 
@@ -322,7 +337,7 @@ class MainWindow(QWidget):
             text="MUTE SOUNDS",
             geometry=(1125, screen_h + 110, 150, 50),
             group="main_widgets",
-            action=sm.toggle_mute,
+            action=sound_manager.toggle_mute,
             wgt_type="btn",
             name="mute"
         )
@@ -371,11 +386,11 @@ class MainWindow(QWidget):
         wgt_type = watched.property("WidgetType")
         if event.type() == QEvent.Type.Enter:
             if wgt_type in ("btn", "slider", "example_img_btn"):
-                sm.play(wgt_type, "hover")
+                sound_manager.play(wgt_type, "hover")
         elif isinstance(event, QMouseEvent) and event.type() == QEvent.Type.MouseButtonRelease:
             if event.button() == Qt.MouseButton.LeftButton and watched.rect().contains(event.position().toPoint()):
                 if wgt_type in ("btn", "example_img_btn"):
-                    sm.play(wgt_type, "click")
+                    sound_manager.play(wgt_type, "click")
         return super().eventFilter(watched, event)
 
     def highlight_effect_button(self, current_button: QPushButton):
@@ -480,12 +495,11 @@ class MainWindow(QWidget):
     def open_file_dialog(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self,
-            "Wybierz obraz",
+            "Choose image",
             "",
-            "Obrazy (*.png *.jpg *.jpeg *.bmp *.webp);;Wszystkie pliki (*.*)"
+            "Images (*.png *.jpg *.jpeg *.bmp *.webp);;Wszystkie pliki (*.*)"
         )
         if file_path:
-            print(f"Wybrano plik: {file_path}")
             self.prepare_image(file_path)
 
     def prepare_image(self, img_path: str):
@@ -494,7 +508,8 @@ class MainWindow(QWidget):
         Converts image to 16:9 or 9:16 format.
         Triggers initialization of image and effect loop variables.
         """
-        self.switch_ui_to("main_widgets")
+        if self.current_ui == "menu_widgets":
+            self.switch_ui_to("main_widgets")
         self.upload_image = QImage(img_path)
         target_resolution = closest_window_res(self.upload_image)
         if target_resolution != "correct":
@@ -526,6 +541,31 @@ class MainWindow(QWidget):
             self.effects_manager.wait()
 
         event.accept()
+
+    def handle_start_export(self, file_path: str, duration: int):
+        """
+        Handles save click from dialog box.
+        Calculates and passes parameters to video_exporter.
+        Turns on the recording flag.
+        """
+        fps = cfg.current_values[cfg.current_effect]["SPEED"]
+        total_frames = duration * fps
+        frame_size = (self.effects_manager.qimage.width(), self.effects_manager.qimage.height())
+
+        self.video_exporter.start_recording(file_path, fps, frame_size, total_frames)
+
+        self.effects_manager.start_export()
+
+    def handle_finish_export(self):
+        self.effects_manager.stop_export()
+        self.export_dialogs.close_progress_dialog()
+        self.export_dialogs.open_success_dialog()
+
+    def handle_cancel_export(self):
+        self.effects_manager.stop_export()
+        self.video_exporter.cancel()
+        self.export_dialogs.close_progress_dialog()
+        self.export_dialogs.cancel_dialog.show()
 
 
 def app_init():

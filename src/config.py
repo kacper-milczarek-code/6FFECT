@@ -9,7 +9,7 @@ DEFAULT_VALUES = {
         "BLOCK SIZE": None
     },
     "FADER": {
-        "SPEED": 5,
+        "SPEED": 10,
         "HOLE SIZE": 30,
         "COVERAGE": 1
     },
@@ -52,7 +52,7 @@ sliders_settings = {
 
     "FLIPPER": {
         "SPEED": {
-            "ui_range": (1, 10),
+            "ui_range": (1, 20),
         },
         "BLOCK SIZE": {
             "ui_range": None,
