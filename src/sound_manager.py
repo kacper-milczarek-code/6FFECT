@@ -1,7 +1,7 @@
 from PySide6.QtCore import QUrl, QElapsedTimer
 from PySide6.QtMultimedia import QSoundEffect
 
-SOUND_VOLUME = 0.3
+SOUND_VOLUME = 0.5
 SOUND_COOLDOWNS = {"hover": 150, "click": 50}
 
 muted = False
@@ -11,17 +11,17 @@ timer.start()
 
 sounds = {
     "btn": {
-        "click": "assets/sfx/scifi-click.wav",
-        "hover": "assets/sfx/scifi-hover.wav",
+        "click": "assets/sfx/button-click.wav",
+        "hover": "assets/sfx/button-hover.wav",
     },
 
     "example_img_btn": {
-        "click": "assets/sfx/scifi-click2.wav",
-        "hover": "assets/sfx/scifi-hover2.wav",
+        "click": "assets/sfx/example_image_button-click.wav",
+        "hover": "assets/sfx/example_image_button-hover.wav",
     },
 
     "slider": {
-        "hover": "assets/sfx/scifi-whoosh2.wav",
+        "hover": "assets/sfx/slider-whoosh.wav",
     },
 }
 
