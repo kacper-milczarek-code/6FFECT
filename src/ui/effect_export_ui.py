@@ -153,7 +153,7 @@ class ExportDialogs(QObject):
         self.effect_save.save_button.clicked.connect(lambda checked: self.open_file_save_dialog())
 
     def setup_styles(self):
-        with open("assets/styles/style.qss", encoding="utf-8") as file:
+        with open("src/ui/style.qss", encoding="utf-8") as file:
             style = file.read()
         self.warning.setStyleSheet(style)
         self.effect_save.setStyleSheet(style)

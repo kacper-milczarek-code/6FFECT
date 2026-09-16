@@ -1,9 +1,9 @@
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QFileDialog, QSlider, QButtonGroup
 from PySide6.QtGui import QPixmap, QMouseEvent, QImage
 from PySide6.QtCore import Qt, QEvent
-from engine import EffectsManager
-from effect_export_ui import ExportDialogs
-from video_exporter import VideoExporter
+from src.engine import EffectsManager
+from src.ui.effect_export_ui import ExportDialogs
+from src.video_exporter import VideoExporter
 from src.utils import closest_window_res
 import src.sound_manager as sound_manager
 import src.config as cfg
@@ -76,7 +76,7 @@ class MainWindow(QWidget):
         ui_width, ui_height = 320, 170
         self.setWindowTitle("6FFECT")
         self.setFixedSize(screen_w + ui_width, screen_h + ui_height)
-        with open("assets/styles/style.qss", "r", encoding="utf-8") as f:
+        with open("src/ui/style.qss", "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
         sound_manager.load_sounds()
         self.effects_buttons = QButtonGroup(self)
@@ -573,6 +573,3 @@ def app_init():
     window = MainWindow()
     window.show()
     app.exec()
-
-
-app_init()

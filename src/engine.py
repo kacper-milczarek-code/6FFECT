@@ -25,23 +25,23 @@ class ProcessEffects:
 
         self.rainbower_spread = 0
 
-    def process_flipper(self) -> QImage:
+    def process_flipper(self) -> np.ndarray:
         self.curr_np_img = effects.flipper(self.curr_np_img, self.img_h, self.img_w, self.curr_block_size)
         return self.curr_np_img
 
-    def process_fader(self) -> QImage:
+    def process_fader(self) -> np.ndarray:
         frame_np = effects.fader(self.curr_np_img, self.img_h, self.img_w, self.coverage, self.hole_size)
         return frame_np
 
-    def process_nuker(self) -> QImage:
+    def process_nuker(self) -> np.ndarray:
         self.curr_np_img = effects.nuker(self.curr_np_img)
         return self.curr_np_img
 
-    def process_puzzler(self) -> QImage:
+    def process_puzzler(self) -> np.ndarray:
         frame_np = effects.puzzler(self.curr_np_img, self.img_h, self.img_w, self.curr_block_size)
         return frame_np
 
-    def process_liner(self) -> QImage:
+    def process_liner(self) -> np.ndarray:
         if self.positions.size == 0:
             self.fade = not self.fade
             self.positions = np.random.choice(np.arange(self.img_h), self.img_h, replace=False)
@@ -51,7 +51,7 @@ class ProcessEffects:
         self.positions = np.delete(self.positions, slice(0, self.liner_strength))
         return self.curr_np_img
 
-    def process_rainbower(self) -> QImage:
+    def process_rainbower(self) -> np.ndarray:
         frame_np = effects.rainbower(self.curr_np_img, self.img_h, self.img_w,
                                      self.curr_block_size, self.rainbower_spread)
         return frame_np
@@ -210,4 +210,3 @@ class EffectsManager(QThread):
 
     def stop_export(self):
         self.emit_frame_for_save = False
-
