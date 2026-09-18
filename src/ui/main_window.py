@@ -76,6 +76,7 @@ class MainWindow(QWidget):
         ui_width, ui_height = 320, 170
         self.setWindowTitle("6FFECT")
         self.setFixedSize(screen_w + ui_width, screen_h + ui_height)
+        self.setAcceptDrops(True)
         with open("src/ui/style.qss", "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
         sound_manager.load_sounds()
@@ -89,11 +90,10 @@ class MainWindow(QWidget):
 
         self.effects_manager.start()
         self.effects_manager.display_frame_ready_signal.connect(self.display_image)
+        self.effects_manager.save_frame_ready_signal.connect(self.video_exporter.add_frame)
 
         self.export_dialogs.export_request_signal.connect(self.handle_start_export)
         self.export_dialogs.progress_dialog.cancel_saving_signal.connect(self.handle_cancel_export)
-
-        self.effects_manager.save_frame_ready_signal.connect(self.video_exporter.add_frame)
 
         self.video_exporter.update_progress_bar_value.connect(self.export_dialogs.update_progress_bar_value)
         self.video_exporter.export_finished_signal.connect(self.handle_finish_export)
@@ -366,18 +366,19 @@ class MainWindow(QWidget):
         self.switch_ui_to("menu_widgets")
 
     def switch_ui_to(self, ui_group: str):
+        """Toggle visibility of widgets based on their UIGroup property."""
         self.current_ui = ui_group
-        if ui_group == "main_widgets":
-            show_ui = "main_widgets"
-            hide_ui = "menu_widgets"
-        else:
-            show_ui = "menu_widgets"
-            hide_ui = "main_widgets"
+
         for widget in self.findChildren(QWidget):
-            if widget.property("UIGroup") == hide_ui:
+            group = widget.property("UIGroup")
+            if not group:
+                continue
+
+            if group == ui_group:
+                if widget not in (self.liner_switch_btn, self.liner_switch_lbl):
+                    widget.show()
+            else:
                 widget.hide()
-            if widget.property("UIGroup") == show_ui and widget not in (self.liner_switch_btn, self.liner_switch_lbl):
-                widget.show()
 
     def eventFilter(self, watched: QWidget, event, /):
         """
@@ -491,6 +492,18 @@ class MainWindow(QWidget):
         else:
             self.liner_switch_lbl.setText("ON / [OFF]")
             self.effects_manager.set_liner_glitch_mode(False)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        urls = event.mimeData().urls()
+        if urls:
+            file_path = urls[0].toLocalFile()
+            self.prepare_image(file_path)
 
     def open_file_dialog(self):
         file_path, _ = QFileDialog.getOpenFileName(
