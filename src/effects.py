@@ -102,14 +102,8 @@ def puzzler(arr: np.ndarray, h: int, w: int, block_size: int) -> np.ndarray:
     return shuffled
 
 
-def liner(
-    arr: np.ndarray,
-    strength: int,
-    positions: np.ndarray,
-    fade: bool,
-    arr_normal: np.ndarray,
-    glitch: bool,
-) -> np.ndarray:
+def liner(arr: np.ndarray, strength: int, positions: np.ndarray, fade: bool,
+          arr_normal: np.ndarray, glitch: bool,) -> np.ndarray:
     """Modifies 'strength' rows of the image (1 pixel tall, full width) at row indices taken from 'positions'.
 
     When fade is True: applies the effect to the selected rows — blackens
