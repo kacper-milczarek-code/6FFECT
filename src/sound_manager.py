@@ -23,6 +23,11 @@ sounds = {
     "slider": {
         "hover": "assets/sfx/slider-whoosh.wav",
     },
+
+    "export": {
+        "success": "assets/sfx/export_success.wav",
+        "info": "assets/sfx/export_info.wav",
+    },
 }
 
 loaded_sounds = {}
