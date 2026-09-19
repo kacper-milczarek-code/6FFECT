@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QDialog, QLabel, QPushButton, QSlider, QProgressBar, QWidget, QFileDialog
 from PySide6.QtGui import QMouseEvent
-from PySide6.QtCore import Qt, QEvent, QObject, Signal
+from PySide6.QtCore import Qt, QEvent, QObject, Signal, QStandardPaths
 
 import src.config as cfg
 import src.sound_manager as sound_manager
@@ -174,6 +174,7 @@ class ExportDialogs(QObject):
 
     def launch_export_ui(self):
         if cfg.current_effect == "NO MODE":
+            sound_manager.play("export", "info")
             self.warning.exec()
         else:
             self.effect_save.exec()
@@ -190,13 +191,20 @@ class ExportDialogs(QObject):
         self.success_dialog.exec()
 
     def open_file_save_dialog(self):
-        self.file_path, _ = QFileDialog.getSaveFileName(
-            None, "Save video", "", "Files MP4 (*.mp4);;All files (*)")
-        if not self.file_path:
+        default_dir = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DesktopLocation)
+
+        file_path, _ = QFileDialog.getSaveFileName(
+            None,
+            "Save video",
+            default_dir,
+            "MP4 Files (*.mp4)"
+        )
+        if not file_path:
             return
 
-        if not self.file_path.endswith('.mp4'):
-            self.file_path += '.mp4'
+        if not file_path.endswith(".mp4"):
+            file_path += ".mp4"
+        self.file_path = file_path
 
         self.start_export()
 

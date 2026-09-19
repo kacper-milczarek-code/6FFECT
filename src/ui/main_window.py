@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QFileDialog, QSlider, QButtonGroup
 from PySide6.QtGui import QPixmap, QMouseEvent, QImage
-from PySide6.QtCore import Qt, QEvent
+from PySide6.QtCore import Qt, QEvent, QStandardPaths
 from src.engine import EffectsManager
 from src.ui.effect_export_ui import ExportDialogs
 from src.video_exporter import VideoExporter
@@ -325,7 +325,7 @@ class MainWindow(QWidget):
 
         self.reset_btn = self.make_widget(
             widget_class=QPushButton,
-            text="RESET",
+            text="RESET ALL",
             geometry=(965, screen_h + 110, 150, 50),
             group="main_widgets",
             action=self.reset_to_default_values,
@@ -506,11 +506,12 @@ class MainWindow(QWidget):
             self.prepare_image(file_path)
 
     def open_file_dialog(self):
+        default_dir = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.PicturesLocation)
+
         file_path, _ = QFileDialog.getOpenFileName(
             self,
-            "Choose image",
-            "",
-            "Images (*.png *.jpg *.jpeg *.bmp *.webp);;Wszystkie pliki (*.*)"
+            "Choose image", default_dir,
+            "Images (*.png *.jpg *.jpeg *.bmp *.webp)"
         )
         if file_path:
             self.prepare_image(file_path)
@@ -572,12 +573,14 @@ class MainWindow(QWidget):
     def handle_finish_export(self):
         self.effects_manager.stop_export()
         self.export_dialogs.close_progress_dialog()
+        sound_manager.play("export", "success")
         self.export_dialogs.open_success_dialog()
 
     def handle_cancel_export(self):
         self.effects_manager.stop_export()
         self.video_exporter.cancel()
         self.export_dialogs.close_progress_dialog()
+        sound_manager.play("export", "info")
         self.export_dialogs.cancel_dialog.show()
 
 
