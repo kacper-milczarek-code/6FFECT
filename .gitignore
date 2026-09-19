@@ -1,4 +1,14 @@
 .idea/
 venv/
-6FFECTAPP procedural.py
-nauka pyside6.py
+__pycache__/
+*.py[cod]
+*$py.class
+ENV/
+env/
+build/
+dist/
+*.manifest
+*.spec
+*.log
+.DS_Store
+Thumbs.db
