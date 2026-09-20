@@ -7,7 +7,7 @@ import src.sound_manager as sound_manager
 
 
 class SoundFilter(QObject):
-    def eventFilter(self, watched: QWidget, event):
+    def eventFilter(self, watched: QObject, event) -> bool:
         """
         Triggers sound effects on widget hover and click release events.
         """
@@ -17,10 +17,11 @@ class SoundFilter(QObject):
                 sound_manager.play(wgt_type, "hover")
                 return False
         elif isinstance(event, QMouseEvent) and event.type() == QEvent.Type.MouseButtonRelease:
-            if event.button() == Qt.MouseButton.LeftButton and watched.rect().contains(event.position().toPoint()):
-                if wgt_type == "btn":
-                    sound_manager.play(wgt_type, "click")
-                    return False
+            if isinstance(watched, QWidget) and event.button() == Qt.MouseButton.LeftButton:
+                if watched.rect().contains(event.position().toPoint()):
+                    if wgt_type == "btn":
+                        sound_manager.play(wgt_type, "click")
+                        return False
         return False
 
 

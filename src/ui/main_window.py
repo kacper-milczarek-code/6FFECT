@@ -1,3 +1,5 @@
+from PySide6.QtCore import QObject
+from PySide6.QtGui import QDragEnterEvent, QDropEvent, QCloseEvent
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QFileDialog, QSlider, QButtonGroup
 from PySide6.QtGui import QPixmap, QMouseEvent, QImage
 from PySide6.QtCore import Qt, QEvent, QStandardPaths
@@ -57,7 +59,7 @@ class MainWindow(QWidget):
                 widget.clicked.connect(lambda checked, p=img_path: action(p))
             else:
                 widget.clicked.connect(kwargs["action"])
-        if widget_class is QSlider:
+        if isinstance(widget, QSlider):
             widget.setOrientation(Qt.Orientation.Horizontal)
             widget.setRange(1, 100)
 
@@ -380,18 +382,22 @@ class MainWindow(QWidget):
             else:
                 widget.hide()
 
-    def eventFilter(self, watched: QWidget, event, /):
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:
         """
         Triggers sound effects on widget hover and click release events.
         """
         wgt_type = watched.property("WidgetType")
+
         if event.type() == QEvent.Type.Enter:
             if wgt_type in ("btn", "slider", "example_img_btn"):
                 sound_manager.play(wgt_type, "hover")
+
         elif isinstance(event, QMouseEvent) and event.type() == QEvent.Type.MouseButtonRelease:
-            if event.button() == Qt.MouseButton.LeftButton and watched.rect().contains(event.position().toPoint()):
-                if wgt_type in ("btn", "example_img_btn"):
-                    sound_manager.play(wgt_type, "click")
+            if isinstance(watched, QWidget) and event.button() == Qt.MouseButton.LeftButton:
+                if watched.rect().contains(event.position().toPoint()):
+                    if wgt_type in ("btn", "example_img_btn"):
+                        sound_manager.play(wgt_type, "click")
+
         return super().eventFilter(watched, event)
 
     def highlight_effect_button(self, current_button: QPushButton):
@@ -403,7 +409,7 @@ class MainWindow(QWidget):
             if effect_button.isChecked() and effect_button is not current_button:
                 effect_button.setChecked(False)
 
-    def handle_slider_moved(self, value, label, sld_index):
+    def handle_slider_moved(self, value: int, label: QLabel, sld_index):
         """
         Processes slider movement and calls functions handling slider values.
         """
@@ -414,14 +420,15 @@ class MainWindow(QWidget):
         else:
             self.effects_manager.apply_effects_parameters(cfg.current_sliders_parameters[sld_index], value)
 
-    def change_sliders(self):
+    def change_sliders(self) -> None:
         """
         Updates slider section corresponding with selected effect.
         """
         sliders_labels = (self.slider1_lbl, self.slider2_lbl, self.slider3_lbl)
         sliders = (self.slider1, self.slider2, self.slider3)
-        [(sld_lab.hide(), sld.hide()) for sld_lab, sld in zip(sliders_labels, sliders)]
-        [s.hide() for s in sliders]
+        for sld_lab, sld in zip(sliders_labels, sliders):
+            sld_lab.hide()
+            sld.hide()
         for i in range(len(cfg.current_sliders_parameters)):
             parameter = cfg.current_sliders_parameters[i]
             value = cfg.current_values[cfg.current_effect][parameter]
@@ -493,13 +500,13 @@ class MainWindow(QWidget):
             self.liner_switch_lbl.setText("ON / [OFF]")
             self.effects_manager.set_liner_glitch_mode(False)
 
-    def dragEnterEvent(self, event):
+    def dragEnterEvent(self, event: QDragEnterEvent):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
         else:
             event.ignore()
 
-    def dropEvent(self, event):
+    def dropEvent(self, event: QDropEvent):
         urls = event.mimeData().urls()
         if urls:
             file_path = urls[0].toLocalFile()
@@ -544,7 +551,7 @@ class MainWindow(QWidget):
             else:
                 self.image_display.setPixmap(pixmap.scaled(self.image_display.size()))
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QCloseEvent):
         """
         Handles window close event.
         Ensures proper termination of EffectsManager thread.
