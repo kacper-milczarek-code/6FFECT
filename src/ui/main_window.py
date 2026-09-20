@@ -1,5 +1,5 @@
 from PySide6.QtCore import QObject
-from PySide6.QtGui import QDragEnterEvent, QDropEvent, QCloseEvent
+from PySide6.QtGui import QDragEnterEvent, QDropEvent, QCloseEvent, QFontDatabase
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QFileDialog, QSlider, QButtonGroup
 from PySide6.QtGui import QPixmap, QMouseEvent, QImage
 from PySide6.QtCore import Qt, QEvent, QStandardPaths
@@ -593,6 +593,7 @@ class MainWindow(QWidget):
 
 def app_init():
     app = QApplication()
+    QFontDatabase.addApplicationFont("assets/fonts/Orbitron-Bold.ttf")
     window = MainWindow()
     window.show()
     app.exec()
