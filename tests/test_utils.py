@@ -5,23 +5,19 @@ from src.utils import ui_to_raw, calculate_block_sizes, qimage_to_ndarray, ndarr
 
 
 def test_ui_to_raw_linear_conversion():
-    # Test przeliczania wartości z suwaka UI na zakres surowy
     raw_range = (0.1, 5.0)
     ui_range = (1, 100)
 
-    # Min i Max
     assert ui_to_raw(1, raw_range, ui_range, decimals=1) == 0.1
     assert ui_to_raw(100, raw_range, ui_range, decimals=1) == 5.0
 
 
 def test_ui_to_raw_zero_division():
-    # Test rzucenia wyjątku przy zakazanych danych
     with pytest.raises(ZeroDivisionError):
         ui_to_raw(50, (0, 10), (10, 10), decimals=0)
 
 
 def test_calculate_block_sizes():
-    # Test wyliczania wspólnych dzielników >= 10 dla wymiarów obrazu 1920x1080
     sizes = calculate_block_sizes(1920, 1080)
     assert 10 in sizes
     assert 120 in sizes
@@ -30,9 +26,8 @@ def test_calculate_block_sizes():
 
 
 def test_qimage_and_ndarray_conversion():
-    # Test bezbłędnej konwersji PySide6 QImage -> NumPy ndarray -> QImage
     qimg = QImage(100, 100, QImage.Format.Format_RGB888)
-    qimg.fill(0xFF0000)  # Czerwone tło
+    qimg.fill(0xFF0000)
 
     arr = qimage_to_ndarray(qimg)
     assert isinstance(arr, np.ndarray)
