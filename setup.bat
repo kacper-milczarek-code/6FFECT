@@ -1,6 +1,7 @@
 @echo off
 setlocal
 
+cd /d "%~dp0"
 
 if not exist "venv" (
     echo [INFO] Creating Python virtual environment...
@@ -31,6 +32,11 @@ echo Setup completed! Launching application...
 echo ==========================================
 echo.
 
-.\venv\Scripts\python.exe main.py
+if not exist "main.pyw" (
+    echo [ERROR] File main.pyw not found in the directory: %cd%
+    pause
+    exit /b 1
+)
 
-pause
+start "" ".\venv\Scripts\pythonw.exe" "main.pyw"
+exit
