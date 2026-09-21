@@ -32,11 +32,12 @@ echo Setup completed! Launching application...
 echo ==========================================
 echo.
 
-if not exist "main.pyw" (
-    echo [ERROR] File main.pyw not found in the directory: %cd%
+if not exist "main.py" (
+    echo [ERROR] File main.py not found in the directory: %cd%
     pause
     exit /b 1
 )
 
-start "" ".\venv\Scripts\pythonw.exe" "main.pyw"
+start "" ".\venv\Scripts\python.exe" "main.py"
+
 exit
