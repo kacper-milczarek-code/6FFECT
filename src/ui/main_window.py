@@ -12,7 +12,6 @@ import src.config as cfg
 
 
 class MainWindow(QWidget):
-
     def make_widget(self, widget_class, **kwargs):
         """Universal function for creating and configuring Qt widgets
 
@@ -22,12 +21,6 @@ class MainWindow(QWidget):
             name (str): Set object name via setObjectName().
             group (str): 'UIGroup' property used for show/hide operations.
             wgt_type (str): Widget category ('btn', 'slider', 'example_img_btn') to install the event filter.
-            action (callable): Callback function connected to the clicked signal.
-            value (int): Initial value for QSlider widgets.
-            sld_lbl (QLabel): Label object to display the slider's current name and value.
-            sld_idx (int): Index key used to fetch slider names from current_sliders.
-            effect (str): Name of the effect associated with the button, passed to the action callback.
-            img_path (str): File path to the image passed to the action callback, displayed by image_display.
         """
         widget = widget_class(self)
 
@@ -46,12 +39,27 @@ class MainWindow(QWidget):
             if wgt_type in ("btn", "slider", "example_img_btn"):
                 widget.installEventFilter(self)
 
-        if "action" in kwargs and hasattr(widget, "clicked") and isinstance(widget, QPushButton):
+        if isinstance(widget, QPushButton):
+            return self.set_button(widget, **kwargs)
+
+        if isinstance(widget, QSlider):
+            return self.set_slider(widget, **kwargs)
+
+        return widget
+
+    def set_button(self, widget, **kwargs):
+        """Configures button attributes
+        Kwargs:
+            action (callable): Callback function connected to the clicked signal.
+            effect (str): Name of the effect associated with the button, passed to the action callback.
+            img_path (str): File path to the image passed to the action callback, displayed by image_display.
+        """
+        if "action" in kwargs:
             action = kwargs["action"]
             if "effect" in kwargs:
                 effect = kwargs["effect"]
                 widget.clicked.connect(
-                    lambda checked, w=widget: (self.highlight_effect_button(w), action(effect, checked)))
+                    lambda checked, w=widget: action(w, effect, checked))
                 widget.setCheckable(True)
                 self.effects_buttons.addButton(widget)
             elif "img_path" in kwargs:
@@ -59,17 +67,24 @@ class MainWindow(QWidget):
                 widget.clicked.connect(lambda checked, p=img_path: action(p))
             else:
                 widget.clicked.connect(kwargs["action"])
-        if isinstance(widget, QSlider):
-            widget.setOrientation(Qt.Orientation.Horizontal)
-            widget.setRange(1, 100)
+        return widget
 
-            if "value" in kwargs:
-                widget.setValue(kwargs["value"])
+    def set_slider(self, widget, **kwargs):
+        """Configures slider attributes
+            value (int): Initial value for QSlider widgets.
+            sld_lbl (QLabel): Label object to display the slider's current name and value.
+            sld_idx (int): Index key used to fetch slider names from current_sliders.
+        """
+        widget.setOrientation(Qt.Orientation.Horizontal)
+        widget.setRange(1, 100)
 
-            if "sld_lbl" in kwargs and "sld_idx" in kwargs:
-                lbl, idx = kwargs["sld_lbl"], kwargs["sld_idx"]
-                widget.valueChanged.connect(lambda val, lb=lbl, i=idx: self.handle_slider_moved(val, lb, i))
+        if "value" in kwargs:
+            widget.setValue(kwargs["value"])
 
+        if "sld_lbl" in kwargs and "sld_idx" in kwargs:
+            lbl = kwargs["sld_lbl"]
+            idx = kwargs["sld_idx"]
+            widget.valueChanged.connect(lambda val, lb=lbl, i=idx: self.handle_slider_moved(val, lb, i))
         return widget
 
     def __init__(self):
@@ -467,7 +482,9 @@ class MainWindow(QWidget):
             if effect_button.isChecked():
                 effect_button.setChecked(False)
 
-    def handle_effect_btn_click(self, effect: str, checked: bool):
+    def handle_effect_btn_click(self, btn: QPushButton, effect: str, checked: bool):
+        self.highlight_effect_button(btn)
+
         if checked:
             if effect == "LINER":
                 self.liner_switch_btn.show()
