@@ -1,101 +1,30 @@
 from PySide6.QtCore import QObject
 from PySide6.QtGui import QDragEnterEvent, QDropEvent, QCloseEvent, QFontDatabase
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QFileDialog, QSlider, QButtonGroup
-from PySide6.QtGui import QPixmap, QMouseEvent, QImage
+from PySide6.QtGui import QPixmap, QMouseEvent, QImage, QIcon
 from PySide6.QtCore import Qt, QEvent, QStandardPaths
 from src.engine import EffectsManager
 from src.ui.effect_export_ui import ExportDialogs
 from src.video_exporter import VideoExporter
 from src.utils import closest_window_res
+from src.paths import ICONS_DIR, STYLE_QSS_PATH, ASSETS_DIR, EXAMPLE_IMAGES_DIR, FONTS_DIR
 import src.sound_manager as sound_manager
 import src.config as cfg
 
 
 class MainWindow(QWidget):
-    def make_widget(self, widget_class, **kwargs):
-        """Universal function for creating and configuring Qt widgets
-
-        Kwargs:
-            text (str): Set widget text via setText
-            geometry (tuple[int, int, int, int]): Widget coordinates and size (x, y, width, height).
-            name (str): Set object name via setObjectName().
-            group (str): 'UIGroup' property used for show/hide operations.
-            wgt_type (str): Widget category ('btn', 'slider', 'example_img_btn') to install the event filter.
-        """
-        widget = widget_class(self)
-
-        if "text" in kwargs:
-            widget.setText(kwargs["text"])
-        if "geometry" in kwargs:
-            widget.setGeometry(*kwargs["geometry"])
-        if "name" in kwargs:
-            widget.setObjectName(kwargs["name"])
-        if "group" in kwargs:
-            widget.setProperty("UIGroup", kwargs["group"])
-
-        if "wgt_type" in kwargs:
-            wgt_type = kwargs["wgt_type"]
-            widget.setProperty("WidgetType", wgt_type)
-            if wgt_type in ("btn", "slider", "example_img_btn"):
-                widget.installEventFilter(self)
-
-        if isinstance(widget, QPushButton):
-            return self.set_button(widget, **kwargs)
-
-        if isinstance(widget, QSlider):
-            return self.set_slider(widget, **kwargs)
-
-        return widget
-
-    def set_button(self, widget, **kwargs):
-        """Configures button attributes
-        Kwargs:
-            action (callable): Callback function connected to the clicked signal.
-            effect (str): Name of the effect associated with the button, passed to the action callback.
-            img_path (str): File path to the image passed to the action callback, displayed by image_display.
-        """
-        if "action" in kwargs:
-            action = kwargs["action"]
-            if "effect" in kwargs:
-                effect = kwargs["effect"]
-                widget.clicked.connect(
-                    lambda checked, w=widget: action(w, effect, checked))
-                widget.setCheckable(True)
-                self.effects_buttons.addButton(widget)
-            elif "img_path" in kwargs:
-                img_path = kwargs["img_path"]
-                widget.clicked.connect(lambda checked, p=img_path: action(p))
-            else:
-                widget.clicked.connect(kwargs["action"])
-        return widget
-
-    def set_slider(self, widget, **kwargs):
-        """Configures slider attributes
-            value (int): Initial value for QSlider widgets.
-            sld_lbl (QLabel): Label object to display the slider's current name and value.
-            sld_idx (int): Index key used to fetch slider names from current_sliders.
-        """
-        widget.setOrientation(Qt.Orientation.Horizontal)
-        widget.setRange(1, 100)
-
-        if "value" in kwargs:
-            widget.setValue(kwargs["value"])
-
-        if "sld_lbl" in kwargs and "sld_idx" in kwargs:
-            lbl = kwargs["sld_lbl"]
-            idx = kwargs["sld_idx"]
-            widget.valueChanged.connect(lambda val, lb=lbl, i=idx: self.handle_slider_moved(val, lb, i))
-        return widget
-
     def __init__(self):
         super().__init__()
         screen_w, screen_h = 960, 540
         ui_width, ui_height = 320, 170
         self.setWindowTitle("6FFECT")
         self.setFixedSize(screen_w + ui_width, screen_h + ui_height)
+        self.setWindowIcon(QIcon(str(ICONS_DIR / "6FFECT_icon.ico")))
         self.setAcceptDrops(True)
-        with open("src/ui/style.qss", "r", encoding="utf-8") as f:
-            self.setStyleSheet(f.read())
+        with open(STYLE_QSS_PATH, "r", encoding="utf-8") as file:
+            style_content = file.read()
+            style_content = style_content.replace("assets/", f"{ASSETS_DIR.as_posix()}/")
+            self.setStyleSheet(style_content)
         sound_manager.load_sounds()
         self.effects_buttons = QButtonGroup(self)
         self.effects_buttons.setExclusive(False)
@@ -137,7 +66,7 @@ class MainWindow(QWidget):
             geometry=(screen_w, 44, 320, 168),
             name="example_img1",
             wgt_type="example_img_btn",
-            img_path="assets/example images/img1.png",
+            img_path=EXAMPLE_IMAGES_DIR / "img1.png",
             action=self.prepare_image
         )
 
@@ -146,7 +75,7 @@ class MainWindow(QWidget):
             geometry=(screen_w, 208, 320, 168),
             name="example_img2",
             wgt_type="example_img_btn",
-            img_path="assets/example images/img2.png",
+            img_path=EXAMPLE_IMAGES_DIR / "img2.png",
             action=self.prepare_image
         )
 
@@ -155,7 +84,7 @@ class MainWindow(QWidget):
             geometry=(screen_w, 372, 320, 168),
             name="example_img3",
             wgt_type="example_img_btn",
-            img_path="assets/example images/img3.png",
+            img_path=EXAMPLE_IMAGES_DIR / "img3.png",
             action=self.prepare_image
         )
 
@@ -518,10 +447,17 @@ class MainWindow(QWidget):
             self.effects_manager.set_liner_glitch_mode(False)
 
     def dragEnterEvent(self, event: QDragEnterEvent):
+        allowed_extensions = ('.png', '.jpg', '.jpeg', '.bmp', '.webp')
         if event.mimeData().hasUrls():
-            event.acceptProposedAction()
-        else:
-            event.ignore()
+            urls = event.mimeData().urls()
+            if urls:
+                file_path = urls[0].toLocalFile()
+
+                if file_path.lower().endswith(allowed_extensions):
+                    event.acceptProposedAction()
+                    return
+
+        event.ignore()
 
     def dropEvent(self, event: QDropEvent):
         urls = event.mimeData().urls()
@@ -607,10 +543,85 @@ class MainWindow(QWidget):
         sound_manager.play("export", "info")
         self.export_dialogs.cancel_dialog.show()
 
+    def make_widget(self, widget_class, **kwargs):
+        """Universal function for creating and configuring Qt widgets
+
+        Kwargs:
+            text (str): Set widget text via setText
+            geometry (tuple[int, int, int, int]): Widget coordinates and size (x, y, width, height).
+            name (str): Set object name via setObjectName().
+            group (str): 'UIGroup' property used for show/hide operations.
+            wgt_type (str): Widget category ('btn', 'slider', 'example_img_btn') to install the event filter.
+        """
+        widget = widget_class(self)
+
+        if "text" in kwargs:
+            widget.setText(kwargs["text"])
+        if "geometry" in kwargs:
+            widget.setGeometry(*kwargs["geometry"])
+        if "name" in kwargs:
+            widget.setObjectName(kwargs["name"])
+        if "group" in kwargs:
+            widget.setProperty("UIGroup", kwargs["group"])
+
+        if "wgt_type" in kwargs:
+            wgt_type = kwargs["wgt_type"]
+            widget.setProperty("WidgetType", wgt_type)
+            if wgt_type in ("btn", "slider", "example_img_btn"):
+                widget.installEventFilter(self)
+
+        if isinstance(widget, QPushButton):
+            return self.set_button(widget, **kwargs)
+
+        if isinstance(widget, QSlider):
+            return self.set_slider(widget, **kwargs)
+
+        return widget
+
+    def set_button(self, widget, **kwargs):
+        """Configures button attributes
+        Kwargs:
+            action (callable): Callback function connected to the clicked signal.
+            effect (str): Name of the effect associated with the button, passed to the action callback.
+            img_path (str): File path to the image passed to the action callback, displayed by image_display.
+        """
+        if "action" in kwargs:
+            action = kwargs["action"]
+            if "effect" in kwargs:
+                effect = kwargs["effect"]
+                widget.clicked.connect(
+                    lambda checked, w=widget: action(w, effect, checked))
+                widget.setCheckable(True)
+                self.effects_buttons.addButton(widget)
+            elif "img_path" in kwargs:
+                img_path = kwargs["img_path"]
+                widget.clicked.connect(lambda checked, p=img_path: action(p))
+            else:
+                widget.clicked.connect(kwargs["action"])
+        return widget
+
+    def set_slider(self, widget, **kwargs):
+        """Configures slider attributes
+            value (int): Initial value for QSlider widgets.
+            sld_lbl (QLabel): Label object to display the slider's current name and value.
+            sld_idx (int): Index key used to fetch slider names from current_sliders.
+        """
+        widget.setOrientation(Qt.Orientation.Horizontal)
+        widget.setRange(1, 100)
+
+        if "value" in kwargs:
+            widget.setValue(kwargs["value"])
+
+        if "sld_lbl" in kwargs and "sld_idx" in kwargs:
+            lbl = kwargs["sld_lbl"]
+            idx = kwargs["sld_idx"]
+            widget.valueChanged.connect(lambda val, lb=lbl, i=idx: self.handle_slider_moved(val, lb, i))
+        return widget
+
 
 def app_init():
     app = QApplication()
-    QFontDatabase.addApplicationFont("assets/fonts/Orbitron-Bold.ttf")
+    QFontDatabase.addApplicationFont(str(FONTS_DIR / "Orbitron-Bold.ttf"))
     window = MainWindow()
     window.show()
     app.exec()

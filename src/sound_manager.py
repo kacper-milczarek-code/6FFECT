@@ -1,8 +1,9 @@
 from PySide6.QtCore import QUrl, QElapsedTimer
 from PySide6.QtMultimedia import QSoundEffect
+from src.paths import SFX_DIR
 
 SOUND_VOLUME = 0.5
-SOUND_COOLDOWNS = {"hover": 150, "click": 50}
+SOUND_COOLDOWNS = {"hover": 150, "click": 50, "success": 50, "info": 50}
 
 muted = False
 
@@ -11,22 +12,22 @@ timer.start()
 
 sounds = {
     "btn": {
-        "click": "assets/sfx/button-click.wav",
-        "hover": "assets/sfx/button-hover.wav",
+        "click": SFX_DIR / "button-click.wav",
+        "hover": SFX_DIR / "button-hover.wav",
     },
 
     "example_img_btn": {
-        "click": "assets/sfx/example_image_button-click.wav",
-        "hover": "assets/sfx/example_image_button-hover.wav",
+        "click": SFX_DIR / "example_image_button-click.wav",
+        "hover": SFX_DIR / "example_image_button-hover.wav",
     },
 
     "slider": {
-        "hover": "assets/sfx/slider-whoosh.wav",
+        "hover": SFX_DIR / "slider-whoosh.wav",
     },
 
     "export": {
-        "success": "assets/sfx/export_success.wav",
-        "info": "assets/sfx/export_info.wav",
+        "success": SFX_DIR / "export_success.wav",
+        "info": SFX_DIR / "export_info.wav",
     },
 }
 
@@ -35,7 +36,7 @@ loaded_sounds = {}
 
 def create_sound(path):
     sound = QSoundEffect()
-    sound.setSource(QUrl.fromLocalFile(path))
+    sound.setSource(QUrl.fromLocalFile(str(path)))
     sound.setVolume(SOUND_VOLUME)
     return sound
 

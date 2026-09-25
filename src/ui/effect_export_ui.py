@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QDialog, QLabel, QPushButton, QSlider, QProgressBar, QWidget, QFileDialog
 from PySide6.QtGui import QMouseEvent
 from PySide6.QtCore import Qt, QEvent, QObject, Signal, QStandardPaths
+from src.paths import STYLE_QSS_PATH
 
 import src.config as cfg
 import src.sound_manager as sound_manager
@@ -154,7 +155,7 @@ class ExportDialogs(QObject):
         self.effect_save.save_button.clicked.connect(lambda checked: self.open_file_save_dialog())
 
     def setup_styles(self):
-        with open("src/ui/style.qss", encoding="utf-8") as file:
+        with open(STYLE_QSS_PATH, "r", encoding="utf-8") as file:
             style = file.read()
         self.warning.setStyleSheet(style)
         self.effect_save.setStyleSheet(style)
