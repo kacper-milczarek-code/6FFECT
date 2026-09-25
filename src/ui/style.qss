@@ -142,17 +142,17 @@ QPushButton#example_img3 {
     background-position: center;
 }
 
-QPushButton#example_img1          { background-image: url("assets/example images/thumbnails/img1.png"); }
-QPushButton#example_img1:hover    { background-image: url("assets/example images/thumbnails/img1hover.png"); }
-QPushButton#example_img1:pressed  { background-image: url("assets/example images/thumbnails/img1click.png"); }
+QPushButton#example_img1          { background-image: url("assets/example_images/thumbnails/img1.png"); }
+QPushButton#example_img1:hover    { background-image: url("assets/example_images/thumbnails/img1hover.png"); }
+QPushButton#example_img1:pressed  { background-image: url("assets/example_images/thumbnails/img1click.png"); }
 
-QPushButton#example_img2          { background-image: url("assets/example images/thumbnails/img2.png"); }
-QPushButton#example_img2:hover    { background-image: url("assets/example images/thumbnails/img2hover.png"); }
-QPushButton#example_img2:pressed  { background-image: url("assets/example images/thumbnails/img2click.png"); }
+QPushButton#example_img2          { background-image: url("assets/example_images/thumbnails/img2.png"); }
+QPushButton#example_img2:hover    { background-image: url("assets/example_images/thumbnails/img2hover.png"); }
+QPushButton#example_img2:pressed  { background-image: url("assets/example_images/thumbnails/img2click.png"); }
 
-QPushButton#example_img3          { background-image: url("assets/example images/thumbnails/img3.png"); }
-QPushButton#example_img3:hover    { background-image: url("assets/example images/thumbnails/img3hover.png"); }
-QPushButton#example_img3:pressed  { background-image: url("assets/example images/thumbnails/img3click.png"); }
+QPushButton#example_img3          { background-image: url("assets/example_images/thumbnails/img3.png"); }
+QPushButton#example_img3:hover    { background-image: url("assets/example_images/thumbnails/img3hover.png"); }
+QPushButton#example_img3:pressed  { background-image: url("assets/example_images/thumbnails/img3click.png"); }
 
 
 
