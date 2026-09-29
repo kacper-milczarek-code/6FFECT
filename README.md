@@ -1,5 +1,7 @@
 # 6FFECT
 
+[![Language: PL](https://img.shields.io/badge/Language-PL-red.svg)](README.pl.md)
+
 **6FFECT** is a desktop application designed to apply six custom, dynamic visual effects to any image. 
 It features real-time parameter adjustment, allowing users to fine-tune image properties and effect behavior on the fly. 
 The application is wrapped in a polished, sci-fi-inspired user interface, complete with custom graphics and interactive sound effects.
@@ -40,8 +42,30 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 * **[Pillow (PIL)](https://python-pillow.org/)** — Image loading, basic processing, and format handling
 * **[Pytest](https://docs.pytest.org/)** — Automated unit and integration testing library
 
-## 📋 System Requirements
 
+## 🧩 Project Structure
+```text
+6FFECT/
+├── src/
+│   ├── ui/
+|   |   ├── effect_export_ui.py # Export UI dialogs
+│   |   └── main_window.py      # Main PySide6 UI window, signal & event handling
+|   |   └── style.qss           # QSS stylesheet for entire interface
+│   ├── config.py               # Central application settings, default ranges & slider mappings
+│   ├── effects.py              # Vectorized NumPy VFX algorithms & PIL image adjustments
+│   ├── engine.py               # Background QThread engine for real-time frame rendering
+│   ├── paths.py                # Path definitions for assets, icons, fonts, and stylesheets
+│   ├── sound_manager.py        # Audio feedback controller with event throttling & mute toggle
+│   ├── utils.py                # Format conversions (QImage <-> NumPy <-> PIL) & math helpers
+│   └── video_exporter.py       # OpenCV MP4 video exporter
+├── assets/                     # Sound effects, fonts, icons & example images
+├── tests/                      # Simple unit tests for the effects and utils modules
+├── main.py                     # Application entry point
+├── setup.bat                   # Application setup
+└── requirements.txt            # Python dependencies
+```
+
+## 📋 System Requirements
 | Requirement | Details |
 | :--- | :--- |
 | **Operating System** | 💻 **Windows** (tested on Windows 10 / 11) |
@@ -95,7 +119,3 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 1. **Antivirus Delay:** If your antivirus flags the executable during the first launch, please wait a few seconds for it to finish scanning.
 2. **Blocked File:** If the application is blocked or quarantined, locate it in your antivirus software settings and select *"Restore / Allow as an Exception"*.
 3. **Manual Fallback:** If the standalone executable (Option 1) still fails to launch, please try the manual Python environment setup described in Option 2 or Option 3.
-
-
-
-
