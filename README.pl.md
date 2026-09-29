@@ -1,6 +1,6 @@
 # 6FFECT
 
-[![Language: EN](https://img.shields.io/badge/Language-EN-blue.svg)](README.md)
+For English version, click [here](README.md)
 
 **6FFECT** to aplikacja desktopowa służąca do nakładania sześciu autorskich, dynamicznych efektów wizualnych na dowolny obraz. 
 Program oferuje regulację parametrów w czasie rzeczywistym, co pozwala użytkownikom na bieżąco dostosowywać właściwości obrazu i zachowanie efektów. 
@@ -42,8 +42,30 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 - **[Pillow (PIL)](https://python-pillow.org/)** — Wczytywanie, konwersja i podstawowa edycja plików graficznych
 - **[Pytest](https://docs.pytest.org/)** — Narzędzie do automatycznych testów jednostkowych i integracyjnych
 
-## 📋 Wymagania systemowe
+## 🧩 Struktura projektu
 
+```text
+6FFECT/
+├── src/
+│   ├── ui/
+│   │   ├── effect_export_ui.py # Okna dialogowe eksportu wideo
+│   │   ├── main_window.py      # Główne okno interfejsu (PySide6), obsługa zdarzeń i sygnałów
+│   │   └── style.qss           # Arkusz stylów QSS dla całego interfejsu
+│   ├── config.py               # Ustawienia aplikacji, wartości domyślne i mapowanie suwaków
+│   ├── effects.py              # Wektorowe algorytmy VFX (NumPy) i edycja obrazu (PIL)
+│   ├── engine.py               # Wielowątkowy silnik wykonawczy (QThread) do renderowania w czasie rzeczywistym
+│   ├── paths.py                # Ścieżki do zasobów, ikon, czcionek i stylów
+│   ├── sound_manager.py        # Kontroler efektów dźwiękowych (SFX) z zoptymalizowanym nakładaniem dźwięków i wyciszaniem
+│   ├── utils.py                # Konwersje formatów (QImage <-> NumPy <-> PIL) oraz funkcje pomocnicze
+│   └── video_exporter.py       # Silnik eksportu do plików MP4 wykorzystujący OpenCV
+├── assets/                     # Efekty dźwiękowe, czcionki, ikony i obrazy przykładowe
+├── tests/                      # Testy jednostkowe dla modułów effects oraz utils
+├── main.py                     # Główny punkt wejścia aplikacji
+├── setup.bat                   # Skrypt automatycznej konfiguracji środowiska
+└── requirements.txt            # Zależności projektu
+```
+
+## 📋 Wymagania systemowe
 | Wymaganie | Szczegóły |
 | :--- | :--- |
 | **System operacyjny** | 💻 **Windows** (testowano na Windows 10 / 11) |
@@ -53,7 +75,6 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 > ⚠️ **Uwaga:** Aplikacja **6FFECT** jest obecnie zaprojektowana i przetestowana wyłącznie dla systemu **Windows**. Wsparcie dla systemów macOS oraz Linux nie jest na ten moment dostępne.
 
 ### 📦 Opcje instalacji i uruchomienia
-
 #### Opcja 1: Samodzielny plik wykonywalny (Najszybsza)
 1. Pobierz plik `6FFECT.exe` z sekcji **Assets** poniżej.
 2. *(Opcjonalnie)* Tymczasowo wyłącz lub dostosuj swój program antywirusowy, jeśli blokuje nieznane pliki wykonywalne.
