@@ -1,6 +1,6 @@
 # 6FFECT
 
-For English version, click [here](README.md)
+> For the English version, see [README.md](README.md)
 
 **6FFECT** to aplikacja desktopowa służąca do nakładania sześciu autorskich, dynamicznych efektów wizualnych na dowolny obraz. 
 Program oferuje regulację parametrów w czasie rzeczywistym, co pozwala użytkownikom na bieżąco dostosowywać właściwości obrazu i zachowanie efektów. 
@@ -74,7 +74,7 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 
 > ⚠️ **Uwaga:** Aplikacja **6FFECT** jest obecnie zaprojektowana i przetestowana wyłącznie dla systemu **Windows**. Wsparcie dla systemów macOS oraz Linux nie jest na ten moment dostępne.
 
-### 📦 Opcje instalacji i uruchomienia
+## 📦 Opcje instalacji i uruchomienia
 #### Opcja 1: Samodzielny plik wykonywalny (Najszybsza)
 1. Pobierz plik `6FFECT.exe` z sekcji **Assets** poniżej.
 2. *(Opcjonalnie)* Tymczasowo wyłącz lub dostosuj swój program antywirusowy, jeśli blokuje nieznane pliki wykonywalne.
@@ -88,7 +88,7 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 1. Pobierz kod źródłowy:
    * **Przez Git:**
      ```bash
-     git clone [https://github.com/kacper-milczarek-code/6FFECT.git](https://github.com/kacper-milczarek-code/6FFECT.git)
+     git clone https://github.com/kacper-milczarek-code/6FFECT.git
      ```
    * **Lub jako ZIP:** Pobierz i wypakuj **Source code (zip)** z sekcji Assets poniżej, a następnie otwórz wypakowany folder w terminalu.
 
@@ -115,7 +115,25 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
    python main.py
    ```
 
-### 🔧 Rozwiązywanie problemów z uruchomieniem
+## 🔧 Rozwiązywanie problemów z uruchomieniem
 1. Opóźnienie antywirusa: Jeśli Twój program antywirusowy zacznie skanować plik wykonywalny przy pierwszym uruchomieniu, poczekaj kilka sekund na zakończenie procesu.
 2. Zablokowany plik: Jeśli aplikacja zostanie zablokowana lub poddana kwarantannie, znajdź ją w ustawieniach oprogramowania antywirusowego i wybierz "Przywróć / Dodaj do wyjątków".
 3. Uruchomienie ręczne: Jeśli samodzielny plik wykonywalny (Opcja 1) nadal nie chce się uruchomić, spróbuj skonfigurować środowisko Pythona manualnie, zgodnie z krokami w Opcji 2 lub Opcji 3.
+
+## 🧪 Uruchamianie testów
+Do testowania aplikacji wykorzystywana jest biblioteka **pytest**.
+1. Upewnij się, że masz zainstalowane wszystkie wymagane zależności:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Uruchom testy z głównego katalogu projektu:
+   ```bash
+   pytest
+   ```
+3. Aby uruchomić testy w trybie szczegółowym (verbose), użyj polecenia:
+   ```bash
+   pytest -v
+   ```
+
+## 📜 Licencja
+Projekt jest udostępniany na licencji MIT - szczegóły znajdziesz w pliku [LICENSE](LICENSE).
