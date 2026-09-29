@@ -1,6 +1,6 @@
 # 6FFECT
 
-[![Language: PL](https://img.shields.io/badge/Language-PL-red.svg)](README.pl.md)
+> Aby przejść do polskiej wersji, zobacz [README.pl.md](README.pl.md).
 
 **6FFECT** is a desktop application designed to apply six custom, dynamic visual effects to any image. 
 It features real-time parameter adjustment, allowing users to fine-tune image properties and effect behavior on the fly. 
@@ -24,12 +24,12 @@ I developed the custom visual effects from scratch, utilizing NumPy for high-per
 - **Drag & Drop**: Quick image loading with smart 16:9 / 9:16 aspect ratio fitting.
 
 ## ⚡ Visual effects
-- FLIPPER: Divides the image into squares and rotates each square 90 degrees to the left.
-- FADER: Applies irregular blob-like patches to the image by blacking out groups of pixels.
-- NUKER: Brightens all image pixels causing glitch-art-style degradation due to RGB channel overflow.
-- PUZZLER: Divides the image into squares and randomly reorders their positions.
-- LINER: Blacks out or glitches image rows. When finished, it performs the reverse process of restoring the original rows.
-- RAINBOWER: Divides the image into squares and tints each one with a random color channel.
+- **FLIPPER**: Divides the image into squares and rotates each square 90 degrees to the left.
+- **FADER**: Applies irregular blob-like patches to the image by blacking out groups of pixels.
+- **NUKER**: Brightens all image pixels causing glitch-art-style degradation due to RGB channel overflow.
+- **PUZZLER**: Divides the image into squares and randomly reorders their positions.
+- **LINER**: Blacks out or glitches image rows. When finished, it performs the reverse process of restoring the original rows.
+- **RAINBOWER**: Divides the image into squares and tints each one with a random color channel.
 
 ## 🎬 Showcase Video
 https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
@@ -74,7 +74,7 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 
 > ⚠️ **Note:** **6FFECT** is currently designed and tested exclusively for **Windows**. Cross-platform support (macOS/Linux) is not available at this time.
 
-### 📦 Installation Options
+## 📦 Installation Options
 #### Option 1: Standalone Executable (Quickest)
 1. Download `6FFECT.exe` from the **Assets** section below.
 2. *(Optional)* Temporarily disable or adjust your antivirus if it blocks untrusted executables.
@@ -115,7 +115,25 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
    python main.py
    ```
 
-### 🔧 Troubleshooting Launch Issues
+## 🔧 Troubleshooting Launch Issues
 1. **Antivirus Delay:** If your antivirus flags the executable during the first launch, please wait a few seconds for it to finish scanning.
 2. **Blocked File:** If the application is blocked or quarantined, locate it in your antivirus software settings and select *"Restore / Allow as an Exception"*.
 3. **Manual Fallback:** If the standalone executable (Option 1) still fails to launch, please try the manual Python environment setup described in Option 2 or Option 3.
+
+## 🧪 Running Tests
+This project uses **pytest** for unit testing.
+1. Ensure all dependencies are installed:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Run tests from the project root directory:
+   ```bash
+   pytest
+   ```
+3. To view detailed output (verbose mode), run:
+   ```bash
+   pytest -v
+   ```
+
+## 📜 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
