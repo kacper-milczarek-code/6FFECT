@@ -12,7 +12,7 @@ Całość została zamknięta w dopracowanym interfejsie inspirowanym stylem sci
 </p>
 
 ## ℹ️️ O projekcie
-6FFECT to mój pierwszy projekt opublikowany na GitHubie. Stworzyłem go, aby rozwinąć swoje umiejętności programowania w języku Python — skupiając się w szczególności na programowaniu obiektowym (OOP), 
+6FFECT to mój pierwszy projekt opublikowany na GitHubie. Stworzyłem go, aby rozwinąć swoje umiejętności programowania w języku Python - skupiając się w szczególności na programowaniu obiektowym (OOP), 
 projektowaniu wielomodułowej architektury aplikacji, zarządzaniu wielowątkowością oraz wdrażaniu przepływu pracy opartego na Git/GitHub. Graficzny interfejs użytkownika został zbudowany przy użyciu frameworka PySide6. 
 Autorskie efekty wizualne stworzyłem od podstaw, wykorzystując bibliotekę NumPy do wysokowydajnych, wektorowych operacji na macierzach, przy częściowym wsparciu biblioteki Pillow.
 
@@ -25,7 +25,7 @@ Autorskie efekty wizualne stworzyłem od podstaw, wykorzystując bibliotekę Num
 
 ## ⚡ Efekty wizualne
 - **FLIPPER**: Dzieli obraz na kwadraty i obraca każdy z nich o 90 stopni w lewo.
-- **FADER**: Nakłada na obraz nieregularne, przypominające plamy, zaczerniając grupy pikseli.
+- **FADER**: Nakłada na obraz nieregularne plamy, zaczerniając nimi grupy pikseli.
 - **NUKER**: Rozjaśnia wszystkie piksele obrazu, powodując degradację w stylu glitch-art poprzez przepełnienie kanałów RGB.
 - **PUZZLER**: Dzieli obraz na kwadraty i losowo zamienia ich pozycje.
 - **LINER**: Zaciemnia lub zniekształca rzędy pikseli. Po zakończeniu wykonuje proces odwrotny, przywracając oryginalne linie.
@@ -35,12 +35,12 @@ Autorskie efekty wizualne stworzyłem od podstaw, wykorzystując bibliotekę Num
 https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 
 ## 🛠️ Stos technologiczny
-- **[Python](https://www.python.org/)** — Główny język programowania
-- **[PySide6 / Qt](https://doc.qt.io/qtforpython-6/)** — Framework interfejsu graficznego (GUI) oraz komponenty UI
-- **[NumPy](https://numpy.org/)** — Wydajne operacje wektorowe na macierzach (silnik efektów wizualnych)
-- **[OpenCV](https://opencv.org/)** — Przetwarzanie obrazu i analiza wizualna w czasie rzeczywistym
-- **[Pillow (PIL)](https://python-pillow.org/)** — Wczytywanie, konwersja i podstawowa edycja plików graficznych
-- **[Pytest](https://docs.pytest.org/)** — Narzędzie do automatycznych testów jednostkowych i integracyjnych
+- **[Python](https://www.python.org/)** - Główny język programowania
+- **[PySide6 / Qt](https://doc.qt.io/qtforpython-6/)** - Framework interfejsu graficznego (GUI) oraz komponenty UI
+- **[NumPy](https://numpy.org/)** - Wydajne operacje wektorowe na macierzach (silnik efektów wizualnych)
+- **[OpenCV](https://opencv.org/)** - Nagrywanie wideo do eksportu
+- **[Pillow (PIL)](https://python-pillow.org/)** - Wczytywanie, konwersja i podstawowa edycja plików graficznych
+- **[Pytest](https://docs.pytest.org/)** - Narzędzie do automatycznych testów jednostkowych i integracyjnych
 
 ## 🧩 Struktura projektu
 
@@ -48,21 +48,21 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 6FFECT/
 ├── src/
 │   ├── ui/
-│   │   ├── effect_export_ui.py # Okna dialogowe eksportu wideo
-│   │   ├── main_window.py      # Główne okno interfejsu (PySide6), obsługa zdarzeń i sygnałów
-│   │   └── style.qss           # Arkusz stylów QSS dla całego interfejsu
-│   ├── config.py               # Ustawienia aplikacji, wartości domyślne i mapowanie suwaków
-│   ├── effects.py              # Wektorowe algorytmy VFX (NumPy) i edycja obrazu (PIL)
-│   ├── engine.py               # Wielowątkowy silnik wykonawczy (QThread) do renderowania w czasie rzeczywistym
-│   ├── paths.py                # Ścieżki do zasobów, ikon, czcionek i stylów
-│   ├── sound_manager.py        # Kontroler efektów dźwiękowych (SFX) z zoptymalizowanym nakładaniem dźwięków i wyciszaniem
-│   ├── utils.py                # Konwersje formatów (QImage <-> NumPy <-> PIL) oraz funkcje pomocnicze
-│   └── video_exporter.py       # Silnik eksportu do plików MP4 wykorzystujący OpenCV
-├── assets/                     # Efekty dźwiękowe, czcionki, ikony i obrazy przykładowe
-├── tests/                      # Testy jednostkowe dla modułów effects oraz utils
-├── main.py                     # Główny punkt wejścia aplikacji
-├── setup.bat                   # Skrypt automatycznej konfiguracji środowiska
-└── requirements.txt            # Zależności projektu
+│   │   ├── effect_export_ui.py   # Okna dialogowe eksportu wideo
+│   │   ├── main_window.py        # Główne okno interfejsu (PySide6), obsługa zdarzeń i sygnałów
+│   │   └── style.qss             # Arkusz stylów QSS dla całego interfejsu
+│   ├── config.py                 # Ustawienia aplikacji, wartości domyślne i mapowanie suwaków
+│   ├── effects.py                # Wektorowe algorytmy VFX (NumPy) i edycja obrazu (PIL)
+│   ├── engine.py                 # Wielowątkowy silnik wykonawczy (QThread) do renderowania w czasie rzeczywistym
+│   ├── paths.py                  # Ścieżki do zasobów, ikon, czcionek i stylów
+│   ├── sound_manager.py          # Kontroler efektów dźwiękowych (SFX) z zoptymalizowanym nakładaniem dźwięków i wyciszaniem
+│   ├── utils.py                  # Konwersje formatów (QImage <-> NumPy <-> PIL) oraz funkcje pomocnicze
+│   └── video_exporter.py         # Silnik eksportu do plików MP4 wykorzystujący OpenCV
+├── assets/                       # Efekty dźwiękowe, czcionki, ikony i obrazy przykładowe
+├── tests/                        # Testy jednostkowe dla modułów effects oraz utils
+├── main.py                       # Główny punkt wejścia aplikacji
+├── setup.bat                     # Skrypt automatycznej konfiguracji środowiska
+└── requirements.txt              # Zależności projektu
 ```
 
 ## 📋 Wymagania systemowe
@@ -78,7 +78,7 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 #### Opcja 1: Samodzielny plik wykonywalny (Najszybsza)
 1. Pobierz plik `6FFECT.exe` z sekcji **Assets** poniżej.
 2. *(Opcjonalnie)* Tymczasowo wyłącz lub dostosuj swój program antywirusowy, jeśli blokuje nieznane pliki wykonywalne.
-3. Uruchom `6FFECT.exe` bezpośrednio — instalacja środowiska Python nie jest wymagana!
+3. Uruchom `6FFECT.exe` bezpośrednio - instalacja środowiska Python nie jest wymagana!
 
 #### Opcja 2: Skrypt instalacyjny (Ze źródeł)
 1. Pobierz i wypakuj archiwum **Source code (zip)** z sekcji Assets.
