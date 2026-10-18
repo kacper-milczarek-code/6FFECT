@@ -12,7 +12,7 @@ The application is wrapped in a polished, sci-fi-inspired user interface, comple
 </p>
 
 ## ℹ️ About this project
-6FFECT is my first project published on GitHub. I developed it to advance my Python programming skills — specifically focusing on Object-Oriented Programming (OOP), 
+6FFECT is my first project published on GitHub. I developed it to advance my Python programming skills - specifically focusing on Object-Oriented Programming (OOP), 
 designing multi-module application architecture, managing multithreading, and adopting Git/GitHub workflows. The graphical user interface was built using the PySide6 framework. 
 I developed the custom visual effects from scratch, utilizing NumPy for high-performance vectorized matrix operations, along with partial integration of the Pillow library.
 
@@ -35,12 +35,12 @@ I developed the custom visual effects from scratch, utilizing NumPy for high-per
 https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 
 ## 🛠️ Created With
-* **[Python](https://www.python.org/)** — Core programming language
-* **[PySide6 / Qt](https://doc.qt.io/qtforpython-6/)** — GUI framework and user interface components
-* **[NumPy](https://numpy.org/)** — High-performance vectorized matrix operations for custom VFX
-* **[OpenCV](https://opencv.org/)** — Real-time computer vision and advanced image manipulation
-* **[Pillow (PIL)](https://python-pillow.org/)** — Image loading, basic processing, and format handling
-* **[Pytest](https://docs.pytest.org/)** — Automated unit and integration testing library
+* **[Python](https://www.python.org/)** - Core programming language
+* **[PySide6 / Qt](https://doc.qt.io/qtforpython-6/)** - GUI framework and user interface components
+* **[NumPy](https://numpy.org/)** - High-performance vectorized matrix operations for custom VFX
+* **[OpenCV](https://opencv.org/)** - Video recording for export
+* **[Pillow (PIL)](https://python-pillow.org/)** - Image loading, basic processing, and format handling
+* **[Pytest](https://docs.pytest.org/)** - Automated unit and integration testing library
 
 
 ## 🧩 Project Structure
@@ -48,21 +48,21 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 6FFECT/
 ├── src/
 │   ├── ui/
-|   |   ├── effect_export_ui.py # Export UI dialogs
-│   |   └── main_window.py      # Main PySide6 UI window, signal & event handling
-|   |   └── style.qss           # QSS stylesheet for entire interface
-│   ├── config.py               # Central application settings, default ranges & slider mappings
-│   ├── effects.py              # Vectorized NumPy VFX algorithms & PIL image adjustments
-│   ├── engine.py               # Background QThread engine for real-time frame rendering
-│   ├── paths.py                # Path definitions for assets, icons, fonts, and stylesheets
-│   ├── sound_manager.py        # Audio feedback controller with event throttling & mute toggle
-│   ├── utils.py                # Format conversions (QImage <-> NumPy <-> PIL) & math helpers
-│   └── video_exporter.py       # OpenCV MP4 video exporter
-├── assets/                     # Sound effects, fonts, icons & example images
-├── tests/                      # Simple unit tests for the effects and utils modules
-├── main.py                     # Application entry point
-├── setup.bat                   # Application setup
-└── requirements.txt            # Python dependencies
+│   │   ├── effect_export_ui.py   # Export UI dialogs
+│   │   ├── main_window.py        # Main PySide6 UI window, signal & event handling
+│   │   └── style.qss             # QSS stylesheet for entire interface
+│   ├── config.py                 # Central application settings, default ranges & slider mappings
+│   ├── effects.py                # Vectorized NumPy VFX algorithms & PIL image adjustments
+│   ├── engine.py                 # Background QThread engine for real-time frame rendering
+│   ├── paths.py                  # Path definitions for assets, icons, fonts, and stylesheets
+│   ├── sound_manager.py          # Audio feedback controller with event throttling & mute toggle
+│   ├── utils.py                  # Format conversions (QImage <-> NumPy <-> PIL) & math helpers
+│   └── video_exporter.py         # OpenCV MP4 video exporter
+├── assets/                       # Sound effects, fonts, icons & example images
+├── tests/                        # Simple unit tests for the effects and utils modules
+├── main.py                       # Application entry point
+├── setup.bat                     # Application setup
+└── requirements.txt              # Python dependencies
 ```
 
 ## 📋 System Requirements
@@ -78,7 +78,7 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 #### Option 1: Standalone Executable (Quickest)
 1. Download `6FFECT.exe` from the **Assets** section below.
 2. *(Optional)* Temporarily disable or adjust your antivirus if it blocks untrusted executables.
-3. Run `6FFECT.exe` directly — no Python installation required!
+3. Run `6FFECT.exe` directly - no Python installation required!
 
 #### Option 2: Setup Script (From Source)
 1. Download and extract **Source code (zip)** from Assets.
