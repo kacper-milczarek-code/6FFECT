@@ -4,7 +4,6 @@
 QWidget {
     background-color: #00002D;
     color: #FFFFFF;
-    font-family: 'Orbitron', 'Segoe UI', sans-serif;
     font-size: 13px;
 }
 

@@ -1,5 +1,5 @@
 from PySide6.QtCore import QObject
-from PySide6.QtGui import QDragEnterEvent, QDropEvent, QCloseEvent, QFontDatabase
+from PySide6.QtGui import QDragEnterEvent, QDropEvent, QCloseEvent, QFontDatabase, QFont
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QFileDialog, QSlider, QButtonGroup
 from PySide6.QtGui import QPixmap, QMouseEvent, QImage, QIcon
 from PySide6.QtCore import Qt, QEvent, QStandardPaths
@@ -621,7 +621,14 @@ class MainWindow(QWidget):
 
 def app_init():
     app = QApplication()
-    QFontDatabase.addApplicationFont(str(FONTS_DIR / "Orbitron-Bold.ttf"))
+    font_path = str(FONTS_DIR / "Orbitron-Bold.ttf")
+    font_id = QFontDatabase.addApplicationFont(font_path)
+
+    if font_id == -1:
+        print("[WARNING] App font file not found, falling back to system font.")
+
+    app_font = QFont("Orbitron")
+    app.setFont(app_font)
     window = MainWindow()
     window.show()
     app.exec()
