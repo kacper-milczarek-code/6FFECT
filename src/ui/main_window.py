@@ -8,7 +8,7 @@ from src.ui.effect_export_ui import ExportDialogs
 from src.video_exporter import VideoExporter
 from src.utils import closest_window_res
 from src.paths import ICONS_DIR, STYLE_QSS_PATH, ASSETS_DIR, EXAMPLE_IMAGES_DIR, FONTS_DIR
-import src.sound_manager as sound_manager
+from src.sound_manager import SoundManager
 import src.config as cfg
 
 
@@ -25,14 +25,16 @@ class MainWindow(QWidget):
             style_content = file.read()
             style_content = style_content.replace("assets/", f"{ASSETS_DIR.as_posix()}/")
             self.setStyleSheet(style_content)
-        sound_manager.load_sounds()
         self.effects_buttons = QButtonGroup(self)
         self.effects_buttons.setExclusive(False)
         self.upload_image = None
 
+        self.sound_manager = SoundManager()
         self.export_dialogs = ExportDialogs()
         self.effects_manager = EffectsManager()
         self.video_exporter = VideoExporter()
+
+        self.sound_manager.load_sounds(self)
 
         self.effects_manager.start()
         self.effects_manager.display_frame_ready_signal.connect(self.display_image)
@@ -256,7 +258,7 @@ class MainWindow(QWidget):
             text="SAVE VIDEO",
             geometry=(965, screen_h + 50, 150, 50),
             group="main_widgets",
-            action=self.export_dialogs.launch_export_ui,
+            action=self.handle_export_call,
             wgt_type="btn"
         )
 
@@ -283,7 +285,7 @@ class MainWindow(QWidget):
             text="MUTE SOUNDS",
             geometry=(1125, screen_h + 110, 150, 50),
             group="main_widgets",
-            action=sound_manager.toggle_mute,
+            action=self.sound_manager.toggle_mute,
             wgt_type="btn",
             name="mute"
         )
@@ -334,13 +336,13 @@ class MainWindow(QWidget):
 
         if event.type() == QEvent.Type.Enter:
             if wgt_type in ("btn", "slider", "example_img_btn"):
-                sound_manager.play(wgt_type, "hover")
+                self.sound_manager.play(wgt_type, "hover")
 
         elif isinstance(event, QMouseEvent) and event.type() == QEvent.Type.MouseButtonRelease:
             if isinstance(watched, QWidget) and event.button() == Qt.MouseButton.LeftButton:
                 if watched.rect().contains(event.position().toPoint()):
                     if wgt_type in ("btn", "example_img_btn"):
-                        sound_manager.play(wgt_type, "click")
+                        self.sound_manager.play(wgt_type, "click")
 
         return super().eventFilter(watched, event)
 
@@ -516,6 +518,11 @@ class MainWindow(QWidget):
 
         event.accept()
 
+    def handle_export_call(self):
+        if cfg.current_effect == "NO MODE":
+            self.sound_manager.play("export", "info")
+        self.export_dialogs.launch_export_ui()
+
     def handle_start_export(self, file_path: str, duration: int):
         """
         Handles save click from dialog box.
@@ -533,14 +540,14 @@ class MainWindow(QWidget):
     def handle_finish_export(self):
         self.effects_manager.stop_export()
         self.export_dialogs.close_progress_dialog()
-        sound_manager.play("export", "success")
+        self.sound_manager.play("export", "success")
         self.export_dialogs.open_success_dialog()
 
     def handle_cancel_export(self):
         self.effects_manager.stop_export()
         self.video_exporter.cancel()
         self.export_dialogs.close_progress_dialog()
-        sound_manager.play("export", "info")
+        self.sound_manager.play("export", "info")
         self.export_dialogs.cancel_dialog.show()
 
     def make_widget(self, widget_class, **kwargs):
@@ -602,6 +609,7 @@ class MainWindow(QWidget):
 
     def set_slider(self, widget, **kwargs):
         """Configures slider attributes
+        Kwargs:
             value (int): Initial value for QSlider widgets.
             sld_lbl (QLabel): Label object to display the slider's current name and value.
             sld_idx (int): Index key used to fetch slider names from current_sliders.

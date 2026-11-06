@@ -2,12 +2,14 @@ from PySide6.QtWidgets import QDialog, QLabel, QPushButton, QSlider, QProgressBa
 from PySide6.QtGui import QMouseEvent
 from PySide6.QtCore import Qt, QEvent, QObject, Signal, QStandardPaths
 from src.paths import STYLE_QSS_PATH
-
+from src.sound_manager import SoundManager
 import src.config as cfg
-import src.sound_manager as sound_manager
 
 
 class SoundFilter(QObject):
+    def __init__(self):
+        super().__init__()
+        self.sound_manager = SoundManager()
     def eventFilter(self, watched: QObject, event) -> bool:
         """
         Triggers sound effects on widget hover and click release events.
@@ -15,13 +17,13 @@ class SoundFilter(QObject):
         wgt_type = watched.property("WidgetType")
         if event.type() == QEvent.Type.Enter:
             if wgt_type in ("btn", "slider"):
-                sound_manager.play(wgt_type, "hover")
+                self.sound_manager.play(wgt_type, "hover")
                 return False
         elif isinstance(event, QMouseEvent) and event.type() == QEvent.Type.MouseButtonRelease:
             if isinstance(watched, QWidget) and event.button() == Qt.MouseButton.LeftButton:
                 if watched.rect().contains(event.position().toPoint()):
                     if wgt_type == "btn":
-                        sound_manager.play(wgt_type, "click")
+                        self.sound_manager.play(wgt_type, "click")
                         return False
         return False
 
@@ -176,7 +178,6 @@ class ExportDialogs(QObject):
 
     def launch_export_ui(self):
         if cfg.current_effect == "NO MODE":
-            sound_manager.play("export", "info")
             self.warning.exec()
         else:
             self.effect_save.exec()
