@@ -61,6 +61,7 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 ├── assets/                       # Efekty dźwiękowe, czcionki, ikony i obrazy przykładowe
 ├── tests/                        # Testy jednostkowe dla modułów effects oraz utils
 ├── main.py                       # Główny punkt wejścia aplikacji
+├── pyinstaller_entry.py          # Plik wejściowy służący do pakowania aplikacji do pliku .exe
 ├── setup.bat                     # Skrypt automatycznej konfiguracji środowiska
 └── requirements.txt              # Zależności projektu
 ```
@@ -75,12 +76,12 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 > ⚠️ **Uwaga:** Aplikacja **6FFECT** jest obecnie zaprojektowana i przetestowana wyłącznie dla systemu **Windows**. Wsparcie dla systemów macOS oraz Linux nie jest na ten moment dostępne.
 
 ## 📦 Opcje instalacji i uruchomienia
-#### Opcja 1: Samodzielny plik wykonywalny (Najszybsza)
+#### Opcja 1: Samodzielny plik wykonywalny (Rekomendowana i najszybsza)
 1. Pobierz plik `6FFECT.exe` z sekcji **Assets** poniżej.
 2. *(Opcjonalnie)* Tymczasowo wyłącz lub dostosuj swój program antywirusowy, jeśli blokuje nieznane pliki wykonywalne.
 3. Uruchom `6FFECT.exe` bezpośrednio - instalacja środowiska Python nie jest wymagana!
 
-#### Opcja 2: Skrypt instalacyjny (Ze źródeł)
+#### Opcja 2: Skrypt instalacyjny (Ze źródeł, bez wiersza poleceń)
 1. Pobierz i wypakuj archiwum **Source code (zip)** z sekcji Assets.
 2. Uruchom plik `setup.bat`, aby automatycznie zainstalować zależności i otworzyć aplikację.
 
