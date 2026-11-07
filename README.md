@@ -61,6 +61,7 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 ├── assets/                       # Sound effects, fonts, icons & example images
 ├── tests/                        # Simple unit tests for the effects and utils modules
 ├── main.py                       # Application entry point
+├── pyinstaller_entry.py          # Entry file for packaging application into an .exe
 ├── setup.bat                     # Application setup
 └── requirements.txt              # Python dependencies
 ```
@@ -75,12 +76,12 @@ https://github.com/user-attachments/assets/d456d1c8-99a9-4497-ae2f-ad347bad72f0
 > ⚠️ **Note:** **6FFECT** is currently designed and tested exclusively for **Windows**. Cross-platform support (macOS/Linux) is not available at this time.
 
 ## 📦 Installation Options
-#### Option 1: Standalone Executable (Quickest)
+#### Option 1: Standalone Executable (Recommended & Quickest)
 1. Download `6FFECT.exe` from the **Assets** section below.
 2. *(Optional)* Temporarily disable or adjust your antivirus if it blocks untrusted executables.
 3. Run `6FFECT.exe` directly - no Python installation required!
 
-#### Option 2: Setup Script (From Source)
+#### Option 2: Setup Script (From Source, Without Command Line)
 1. Download and extract **Source code (zip)** from Assets.
 2. Run `setup.bat` to automatically install dependencies and launch the app.
 
